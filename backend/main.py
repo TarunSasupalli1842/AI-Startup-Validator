@@ -1,9 +1,15 @@
+import sys
+import os
+import logging
+
+# Ensure the backend directory is in the python path for Vercel serverless execution
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from routes.validate import router as validation_router
 from config import settings
-import logging
 
 # Configure basic logging format
 logging.basicConfig(
@@ -28,9 +34,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount the routes
+# Mount the routes with and without /api prefix to handle both rewritten and direct paths
+app.include_router(validation_router, prefix="/api")
 app.include_router(validation_router)
 
+@app.get("/api")
+@app.get("/api/")
 @app.get("/")
 def get_root():
     return {

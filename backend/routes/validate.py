@@ -5,7 +5,7 @@ from agents.orchestrator import ValidationOrchestrator
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/api")
+router = APIRouter()
 orchestrator = ValidationOrchestrator()
 
 @router.post("/validate", response_model=ValidationReportResponse)
