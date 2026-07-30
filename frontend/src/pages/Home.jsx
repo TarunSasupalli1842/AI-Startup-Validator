@@ -46,7 +46,12 @@ export default function Home() {
       navigate('/report', { state: { report: result } });
     } catch (err) {
       console.error(err);
-      setError("Failed to validate startup idea. Make sure the backend server is running on http://localhost:8000.");
+      const backendDetail = err.response?.data?.detail;
+      if (backendDetail) {
+        setError(backendDetail);
+      } else {
+        setError("Failed to validate startup idea. Make sure the backend server is running on http://localhost:8000.");
+      }
     } finally {
       setLoading(false);
     }
