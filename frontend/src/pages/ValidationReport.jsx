@@ -84,9 +84,11 @@ export default function ValidationReport() {
             <span className="text-xs font-semibold px-3 py-1 rounded-full bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300 border border-brand-200/20">
               {extracted_idea?.industry || "Startup"}
             </span>
-            <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300 border border-slate-200/20 dark:border-slate-800">
-              {extracted_idea?.revenue_model || "SaaS"}
-            </span>
+            {extracted_idea?.revenue_model && extracted_idea.revenue_model !== "SaaS Subscription" && extracted_idea.revenue_model !== "SaaS" && (
+              <span className="text-xs font-semibold px-3 py-1 rounded-full bg-slate-100 text-slate-700 dark:bg-slate-900 dark:text-slate-300 border border-slate-200/20 dark:border-slate-800">
+                {extracted_idea.revenue_model}
+              </span>
+            )}
           </div>
         </div>
 

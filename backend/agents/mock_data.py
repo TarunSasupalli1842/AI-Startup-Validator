@@ -15,7 +15,7 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
     sol = solution.strip() or "An AI-powered smart scheduling assistant."
     audience = target_audience.strip() or "Busy professionals and students"
     ind = industry.strip() or "Productivity & Software"
-    rev = revenue_model.strip() or "SaaS Subscription"
+    rev = revenue_model.strip() or "To Be Determined"
     
     seed_val = len(startup_name) + len(prob) + len(sol)
     

@@ -37,9 +37,6 @@ export default function Navbar() {
             <a href="/" className="font-display font-bold text-xl tracking-tight bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent dark:from-brand-400 dark:to-indigo-400">
               ValiStart
             </a>
-            <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-brand-100 text-brand-700 dark:bg-brand-950 dark:text-brand-300 border border-brand-200/30">
-              M1
-            </span>
           </div>
 
           {/* Desktop Navigation */}
