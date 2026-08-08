@@ -30,40 +30,41 @@ class MarketResearchAgent:
         web_context = "\n\n---\n\n".join(snippets)
         
         prompt = f"""
-        Conduct market research for a startup operating in the '{idea.industry}' industry.
-        Startup Value Proposition: {idea.value_proposition}
-        Core Problem solved: {idea.core_problem}
+        Conduct market research for a startup in '{idea.industry}'.
+        Value Proposition: {idea.value_proposition}
+        Core Problem: {idea.core_problem}
         Proposed Solution: {idea.core_solution}
         Target Audience: {idea.target_audience}
         
-        We did a real-time web search for "{search_query}" and found these resources:
-        {web_context or "No search results available. Please perform analysis using general industry knowledge."}
+        Search Context:
+        {web_context or "No search results available. Synthesize using general industry knowledge."}
         
-        Synthesize the research and output a structured market analysis matching this JSON schema:
+        Synthesize the research cleanly with zero fluff. Keep demand_analysis to 1-2 direct sentences and bullet points to max 12 words each.
+        Return strictly a JSON object matching this schema:
         {{
-            "demand_analysis": "A detailed 3-4 sentence paragraph describing the current customer demand, market size references if any, and growth drivers for this concept.",
+            "demand_analysis": "A crisp 1-2 sentence statement on real market demand and customer interest.",
             "industry_trends": [
-                "trend 1 - describe recent shift or adoption in the industry",
-                "trend 2",
-                "trend 3",
-                "trend 4"
+                "crisp trend 1 (max 12 words)",
+                "crisp trend 2",
+                "crisp trend 3",
+                "crisp trend 4"
             ],
             "opportunities": [
-                "opportunity 1 - potential expansion or integration target",
-                "opportunity 2",
-                "opportunity 3",
-                "opportunity 4"
+                "crisp opportunity 1 (max 12 words)",
+                "crisp opportunity 2",
+                "crisp opportunity 3",
+                "crisp opportunity 4"
             ],
             "customer_pain_points": [
-                "pain point 1 - why existing systems fail the user",
-                "pain point 2",
-                "pain point 3",
-                "pain point 4"
+                "crisp pain point 1 (max 12 words)",
+                "crisp pain point 2",
+                "crisp pain point 3",
+                "crisp pain point 4"
             ]
         }}
         """
         
-        system_instruction = "You are a professional market research analyst. Synthesize the provided search results to identify market sizing, trends, opportunities, and user pain points. Do not make up URLs, only cite the ones provided."
+        system_instruction = "You are a concise market research analyst. Provide direct, accurate, and genuine market insights without wordy meta-descriptions or generic matter."
         
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

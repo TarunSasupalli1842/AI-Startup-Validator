@@ -29,41 +29,38 @@ class CompetitorAnalysisAgent:
         web_context = "\n\n---\n\n".join(snippets)
         
         prompt = f"""
-        Analyze competitors for a startup named '{idea.startup_name}'.
-        Industry/Domain: {idea.industry}
+        Analyze competitors for '{idea.startup_name}'.
+        Industry: {idea.industry}
         Core Solution: {idea.core_solution}
-        Value Proposition: {idea.value_proposition}
         Target Audience: {idea.target_audience}
         
-        We queried web search results for competitors:
-        {web_context or "No search results available. Synthesize using general industry knowledge."}
+        Search Context:
+        {web_context or "Synthesize using general industry knowledge."}
         
-        Identify at least 2 real (or highly realistic) competitors in the market.
-        Provide competitor profiles, compare features, and define the startup's unique defensive moat.
-        
-        Output the response strictly as a JSON object matching this schema:
+        Identify 2 real or highly realistic competitors. Keep descriptions, comparisons, and moats strictly to 1 concise sentence each. Keep bullet points max 8 words.
+        Output strictly a JSON object matching this schema:
         {{
             "competitors": [
                 {{
                     "name": "Competitor Name",
-                    "description": "Short description of what this competitor does and who they serve.",
+                    "description": "1 short sentence overview of competitor.",
                     "strengths": [
-                        "strength 1",
-                        "strength 2"
+                        "crisp strength 1",
+                        "crisp strength 2"
                     ],
                     "weaknesses": [
-                        "weakness 1",
-                        "weakness 2"
+                        "crisp weakness 1",
+                        "crisp weakness 2"
                     ],
-                    "comparison": "A direct comparison sentence focusing on their feature sets vs ours.",
-                    "competitive_advantage": "Specifically why our startup's approach is better or different than theirs."
+                    "comparison": "1 short sentence direct comparison.",
+                    "competitive_advantage": "1 short sentence edge over this competitor."
                 }}
             ],
-            "unique_moat": "A comprehensive paragraph outlining what makes '{idea.startup_name}' uniquely defensible (e.g. data loops, vertical integration, cost advantage, user experience)."
+            "unique_moat": "1 concise sentence defining '{idea.startup_name}''s primary defensive moat."
         }}
         """
         
-        system_instruction = "You are a competitive intelligence analyst. Map out real-world competitors from search snippets, highlighting their vulnerabilities and defining our startup's primary defensive strategy."
+        system_instruction = "You are a competitive intelligence analyst. Provide concise, direct, accurate competitor insights with zero wordy fluff."
         
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

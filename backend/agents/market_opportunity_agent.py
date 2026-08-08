@@ -24,43 +24,40 @@ class MarketOpportunityAgent:
         web_context = "\n\n---\n\n".join(snippets)
 
         prompt = f"""
-        Evaluate the Market Opportunity (TAM, SAM, SOM, CAGR, Unit Economics) for the following startup idea:
-        
+        Evaluate Market Opportunity (TAM, SAM, SOM, CAGR, Unit Economics) for:
         Startup Name: {idea.startup_name}
         Industry: {idea.industry}
-        Value Proposition: {idea.value_proposition}
         Target Audience: {idea.target_audience}
         Revenue Model: {idea.revenue_model}
-        Market Research Insights: {market_research.demand_analysis}
         
         Search Context:
-        {web_context or "No live search data. Estimate based on standard industry benchmark data."}
+        {web_context or "Standard industry benchmark data."}
         
-        Analyze and return a JSON object matching this schema:
+        Keep all text entries short, direct, accurate, and genuine.
+        Return strictly a JSON object matching this schema:
         {{
-            "tam": "$XX.X Billion (Total global market size for this industry)",
-            "sam": "$X.X Billion (Serviceable addressable market accessible with current model)",
-            "som": "$XX Million (Serviceable obtainable market realistic for 3-5 year capture)",
+            "tam": "$XX.XB Industry Total Market",
+            "sam": "$X.XB Serviceable Segment",
+            "som": "$XXXM 3-Year Target",
             "market_growth_rate": "XX.X% CAGR (2024-2030)",
             "market_drivers": [
-                "driver 1 - e.g. macro industry tailwind",
-                "driver 2",
-                "driver 3",
-                "driver 4"
+                "crisp driver 1 (max 10 words)",
+                "crisp driver 2",
+                "crisp driver 3"
             ],
             "entry_barriers": [
-                "barrier 1 - e.g. capital requirement or network effect",
-                "barrier 2",
-                "barrier 3"
+                "crisp barrier 1 (max 10 words)",
+                "crisp barrier 2",
+                "crisp barrier 3"
             ],
-            "unit_economics_summary": "A concise breakdown of estimated customer acquisition, lifetime value, and margins.",
-            "estimated_cac": "$XX - $XXX per acquired customer",
-            "estimated_ltv": "$XXX - $X,XXX estimated lifetime value",
-            "pricing_power": "High / Medium / Flexible - with a 1-sentence explanation"
+            "unit_economics_summary": "1 concise sentence on CAC, LTV, and gross margins.",
+            "estimated_cac": "$XX - $XXX",
+            "estimated_ltv": "$XXX - $X,XXX",
+            "pricing_power": "High / Medium / Flexible - 1 short rationale"
         }}
         """
 
-        system_instruction = "You are a quantitative market analyst and startup venture capitalist. Provide realistic TAM/SAM/SOM estimates, CAGR figures, and unit economics benchmarking."
+        system_instruction = "You are a concise venture capitalist analyst. Provide accurate, compact TAM/SAM/SOM metrics and unit economics with zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

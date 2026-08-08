@@ -26,64 +26,58 @@ class ComparisonAgent:
         ])
 
         prompt = f"""
-        Build a head-to-head Comparison Matrix evaluating '{idea.startup_name}' against top market alternatives.
-        
-        Startup Name: {idea.startup_name}
+        Build head-to-head Comparison Matrix for '{idea.startup_name}':
         Core Solution: {idea.core_solution}
-        Value Proposition: {idea.value_proposition}
         Revenue Model: {idea.revenue_model}
-        Unique Moat: {competitor_data.unique_moat}
-        
-        Competitor Profiles:
+        Competitor Details:
         {competitor_details}
         
-        Construct a detailed matrix with at least 5 key dimensions (e.g., Pricing Structure, AI Automation Depth, Time-to-Value, Ease of Setup, Defensive Moat / Data Integration).
-        
-        Return the response strictly as a JSON object matching this schema:
+        Keep matrix row cell entries short and punchy (5-8 words max per cell). Keep positioning_summary to 1 crisp sentence.
+        Return strictly a JSON object matching this schema:
         {{
             "competitor_names": ["{comp_1_name}", "{comp_2_name}"],
             "comparison_matrix": [
                 {{
-                    "dimension": "Pricing Model & Transparency",
-                    "our_startup": "Description of our pricing edge (e.g., Flexible, usage-based / transparent)",
-                    "primary_competitor": "Description for {comp_1_name}",
-                    "secondary_competitor": "Description for {comp_2_name}",
-                    "our_advantage": "Clear win summary for our startup"
+                    "dimension": "Pricing & Model",
+                    "our_startup": "Usage-based transparent pricing",
+                    "primary_competitor": "Expensive annual contract",
+                    "secondary_competitor": "Fixed seat pricing",
+                    "our_advantage": "Flexible pay-as-you-grow model"
                 }},
                 {{
-                    "dimension": "AI & Automation Depth",
-                    "our_startup": "Native multi-agent AI framework",
-                    "primary_competitor": "Legacy manual entry or basic scripts",
-                    "secondary_competitor": "Basic single-prompt AI integration",
-                    "our_advantage": "Autonomous multi-agent orchestration"
+                    "dimension": "Automation Depth",
+                    "our_startup": "Native automated workflows",
+                    "primary_competitor": "Manual config & triggers",
+                    "secondary_competitor": "Basic prompt wrapper",
+                    "our_advantage": "Full end-to-end task automation"
                 }},
                 {{
-                    "dimension": "Time-to-Value & Onboarding",
-                    "our_startup": "Instant 1-click execution",
-                    "primary_competitor": "Multi-week onboarding consultation",
-                    "secondary_competitor": "Manual setup templates required",
-                    "our_advantage": "Zero-friction setup with immediate results"
+                    "dimension": "Time-to-Value",
+                    "our_startup": "Instant execution setup",
+                    "primary_competitor": "Multi-week onboarding",
+                    "secondary_competitor": "Manual template creation",
+                    "our_advantage": "Zero setup friction"
                 }},
                 {{
-                    "dimension": "Target User Customization",
-                    "our_startup": "Tailored specifically for {idea.target_audience}",
-                    "primary_competitor": "Generic enterprise suite",
-                    "secondary_competitor": "Limited customization options",
+                    "dimension": "User Target Alignment",
+                    "our_startup": "Built specifically for {idea.target_audience}",
+                    "primary_competitor": "Generic enterprise tool",
+                    "secondary_competitor": "Limited customization",
                     "our_advantage": "Deep domain specialization"
                 }},
                 {{
-                    "dimension": "Defensible Moat & Speed",
-                    "our_startup": "{competitor_data.unique_moat[:60]}...",
-                    "primary_competitor": "Legacy code inertia",
-                    "secondary_competitor": "Basic indie wrapper",
-                    "our_advantage": "Proprietary agent workflows & data loops"
+                    "dimension": "Defensible Moat",
+                    "our_startup": "Vertical integration & speed",
+                    "primary_competitor": "Legacy code complexity",
+                    "secondary_competitor": "Thin basic feature wrapper",
+                    "our_advantage": "Proprietary workflow speed"
                 }}
             ],
-            "positioning_summary": "A 2-3 sentence strategic summary explaining why our startup wins against both enterprise incumbents and lightweight tools."
+            "positioning_summary": "1 concise sentence on market positioning against alternatives."
         }}
         """
 
-        system_instruction = "You are a product strategist and competitive benchmark specialist. Formulate precise, objective, and convincing head-to-head feature comparisons."
+        system_instruction = "You are a concise competitive strategist. Formulate short, direct, accurate feature comparisons without filler words."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

@@ -7,183 +7,187 @@ from models.validation import (
     SwotAnalysis, ValidationScores
 )
 
+def _clean_str(text: str, max_words: int = 12) -> str:
+    """Helper to get a clean, short sentence snippet without cutting off mid-word."""
+    words = text.strip().split()
+    if len(words) <= max_words:
+        return text.strip()
+    return " ".join(words[:max_words]) + "..."
+
 def generate_mock_report(name: str, problem: str, solution: str, target_audience: str, industry: str, revenue_model: str, additional_notes: str = "") -> ValidationReportResponse:
-    random.seed(name)
-    
-    startup_name = name.strip() or "InnovateX"
-    prob = problem.strip() or "Difficulty in managing daily schedules."
-    sol = solution.strip() or "An AI-powered smart scheduling assistant."
-    audience = target_audience.strip() or "Busy professionals and students"
-    ind = industry.strip() or "Productivity & Software"
-    rev = revenue_model.strip() or "To Be Determined"
+    startup_name = name.strip() or "VentureX"
+    prob = problem.strip() or "Manual operational inefficiencies in key workflows."
+    sol = solution.strip() or "Automated AI-driven platform for streamlined operations."
+    audience = target_audience.strip() or "Target Business Users"
+    ind = industry.strip() or "Technology"
+    rev = revenue_model.strip() or "Subscription SaaS"
     
     seed_val = len(startup_name) + len(prob) + len(sol)
+    random.seed(seed_val)
     
-    prob_clarity = 75 + (seed_val % 21)
-    sol_strength = 70 + ((seed_val * 3) % 26)
-    market_potential = 65 + ((seed_val * 7) % 31)
-    comp_risk = 60 + ((seed_val * 11) % 31)
-    feasibility = 70 + ((seed_val * 13) % 26)
-    innovation = 68 + ((seed_val * 17) % 28)
+    prob_clarity = min(98, max(70, 78 + (seed_val % 18)))
+    sol_strength = min(98, max(68, 74 + ((seed_val * 3) % 22)))
+    market_potential = min(98, max(65, 72 + ((seed_val * 7) % 24)))
+    comp_risk = min(98, max(60, 70 + ((seed_val * 11) % 25)))
+    feasibility = min(98, max(70, 76 + ((seed_val * 13) % 20)))
+    innovation = min(98, max(68, 75 + ((seed_val * 17) % 21)))
     
     overall_score = int((prob_clarity * 0.15) + (sol_strength * 0.20) + (market_potential * 0.25) + (comp_risk * 0.10) + (feasibility * 0.15) + (innovation * 0.15))
     
-    if overall_score >= 85:
-        verdict = "Excellent Potential. High market viability, clear problem alignment, and a solid proposed solution. Recommended for immediate MVP development."
-    elif overall_score >= 75:
-        verdict = "Strong Viability. Solid concept with a defined target audience. Minor refinements to the revenue model and competitive positioning are advised before launch."
+    if overall_score >= 82:
+        verdict = f"High Viability — Strong problem-solution fit addressing real pain points in {ind}."
+    elif overall_score >= 72:
+        verdict = f"Moderate Viability — Viable concept with clear demand; focus on differentiation and GTM execution."
     else:
-        verdict = "Moderate Feasibility. Good foundational concept but faces stiff competition or high entry barriers. Consider running rapid prototyping to validate customer willingness to pay."
+        verdict = f"Feasible with Risks — Valid market need; validate customer willingness to pay early."
 
-    ind_kw = ind.split(" ")[0] if ind else "Enterprise"
-    comp_1_name = f"{ind_kw}Flow Systems"
-    comp_2_name = f"Sync{startup_name[:4] or 'Sync'} Hub"
+    ind_keyword = ind.split()[0] if ind else "Market"
+    comp_1_name = f"Legacy {ind_keyword} Systems"
+    comp_2_name = f"Generic {ind_keyword} Tool"
     
     competitors_list = [
         CompetitorEntry(
             name=comp_1_name,
-            description=f"An established traditional player in the {ind} space, providing standard but static solutions to the problem of {prob[:60]}...",
-            strengths=["Wide brand recognition", "Large existing enterprise customer base", "Feature-rich platform"],
-            weaknesses=["High price tag", "Complex user interface", "Slow integration of modern AI capabilities"],
-            comparison=f"Unlike {comp_1_name}, our solution focuses on dynamic automation and simple onboarding, reducing user friction.",
-            competitive_advantage="Lower cost structure, mobile-first design, and deep AI-driven automation."
+            description=f"Traditional incumbent offering legacy solutions for {ind_keyword.lower()} operations.",
+            strengths=["Established brand presence", "Existing enterprise user base", "Broad feature coverage"],
+            weaknesses=["High licensing costs", "Complex manual setup", "Slow UI innovation"],
+            comparison=f"Requires complex manual setup compared to {startup_name}'s streamlined automation.",
+            competitive_advantage=f"Faster time-to-value, lower cost, and modern user-centric design."
         ),
         CompetitorEntry(
             name=comp_2_name,
-            description=f"A newer, agile competitor focusing specifically on {audience} using basic automation plugins.",
-            strengths=["Simple onboarding", "Low entry cost", "Good community support"],
-            weaknesses=["Lacks advanced analytical features", "Fragile integration structure", "Poor scalability for larger teams"],
-            comparison=f"{comp_2_name} addresses basic needs but fails to solve core scalability issues.",
-            competitive_advantage="Comprehensive end-to-end integration and native intelligence built into workflows."
+            description=f"Basic single-purpose software catering to general {audience} needs.",
+            strengths=["Low entry price", "Quick basic setup", "Lightweight interface"],
+            weaknesses=["Limited scalability", "No intelligent automation", "Basic reporting"],
+            comparison=f"Lacks deep workflow intelligence and specialized automation for {ind}.",
+            competitive_advantage=f"End-to-end workflow automation tailored directly to {audience}."
         )
     ]
     
     market_opportunity = MarketOpportunityData(
-        tam=f"${28 + (seed_val % 40)}.5 Billion Global Market",
-        sam=f"${5 + (seed_val % 8)}.2 Billion Addressable Segment",
-        som=f"${350 + (seed_val % 300)} Million Realistic 3-Year Target",
-        market_growth_rate=f"{14 + (seed_val % 10)}.8% CAGR (2024-2030)",
+        tam=f"${20 + (seed_val % 40)}.0B Global {ind_keyword} Market",
+        sam=f"${3 + (seed_val % 8)}.5B Addressable Target Segment",
+        som=f"${150 + (seed_val % 300)}M Realistic 3-Year Target",
+        market_growth_rate=f"{11 + (seed_val % 9)}.2% CAGR (2024-2030)",
         market_drivers=[
-            f"Rapid digitization and AI automation in the {ind} sector.",
-            f"High adoption rates among {audience} seeking speed and efficiency.",
-            "Transition from legacy desktop applications to API-first cloud solutions.",
-            "Rising demand for self-service analytics and automated decision engines."
+            f"Accelerating digital adoption in the {ind} sector",
+            f"Demand for self-service automated tools among {audience}",
+            "Shift from complex legacy tools to intuitive cloud solutions"
         ],
         entry_barriers=[
-            "Established customer trust with traditional legacy platforms.",
-            "Customer compliance requirements and data privacy standards.",
-            "Acquisition cost competition in digital marketing channels."
+            "Customer loyalty to existing legacy vendor relationships",
+            "Stringent data security and compliance expectations",
+            "Customer acquisition cost in competitive digital channels"
         ],
-        unit_economics_summary=f"High gross margin potential (72%+) with recurring revenues based on the {rev} model.",
-        estimated_cac=f"${35 + (seed_val % 40)} - ${90 + (seed_val % 50)}",
-        estimated_ltv=f"${450 + (seed_val % 200)} - ${1200 + (seed_val % 500)}",
-        pricing_power=f"Strong — high user willingness to pay for automation targeting '{prob[:40]}'."
+        unit_economics_summary=f"Strong potential for 70%+ gross margins with scalable recurring revenue via {rev}.",
+        estimated_cac=f"${35 + (seed_val % 25)} - ${75 + (seed_val % 35)}",
+        estimated_ltv=f"${450 + (seed_val % 200)} - ${1200 + (seed_val % 350)}",
+        pricing_power=f"High — clear value delivery directly solving customer pain points."
     )
     
     customer_segmentation = CustomerSegmentationData(
         primary_segment=CustomerSegmentPersona(
-            persona_name=f"Primary {ind_kw} Operators",
-            target_profile=f"Tech-savvy professionals and team leads within {audience} looking to eliminate friction.",
+            persona_name=f"Primary {ind_keyword} Decision Makers",
+            target_profile=f"Key operators and decision-makers within {audience} seeking speed and efficiency.",
             key_pain_points=[
-                f"Wasting time on manual workflows related to {prob[:40]}",
+                f"Time lost to manual tasks and inefficient workflows",
                 "High complexity of legacy software tools",
-                "Lack of proactive, real-time AI assistance"
+                "Lack of real-time automated assistance"
             ],
-            willingness_to_pay="High ($39 - $149/month)",
+            willingness_to_pay="High ($49 - $149 / month)",
             acquisition_channels=[
-                "SEO & Organic Content Marketing",
+                "Targeted Content & Search Engine Marketing",
                 "Product-Led Growth (Freemium Sandbox)",
-                "Niche Community Platforms (Product Hunt, Reddit)"
+                "Niche Industry Communities & Social Proof"
             ],
             buying_triggers=[
-                "Productivity bottlenecks",
+                "Operational bottlenecks and process delays",
                 "Frustration with manual errors in existing tools"
             ]
         ),
         secondary_segments=[
             CustomerSegmentPersona(
-                persona_name="Mid-Market Growth Teams",
-                target_profile=f"Department leaders in medium companies seeking standardized solutions for {ind}.",
+                persona_name="Growing Mid-Market Teams",
+                target_profile=f"Department leads requiring standardized, scalable solutions in {ind}.",
                 key_pain_points=[
-                    "Lack of centralized reporting",
-                    "Difficulty scaling workflows across multiple team members"
+                    "Fragmented team reporting and lack of central visibility",
+                    "Difficulty scaling manual processes across team members"
                 ],
-                willingness_to_pay="Very High ($249 - $699/month)",
+                willingness_to_pay="Very High ($199 - $499 / month)",
                 acquisition_channels=[
-                    "LinkedIn Targeted Campaigns",
-                    "Direct Outbound Sales & Product Demos"
+                    "Direct Outbound Outreach & Demos",
+                    "Industry Partner Networks & Integrations"
                 ],
                 buying_triggers=[
-                    "Scaling team headcount",
-                    "Quarterly audit on operational efficiency"
+                    "Team growth and expanding operational workload"
                 ]
             ),
             CustomerSegmentPersona(
-                persona_name="Indie Freelancers & Students",
-                target_profile="Solo users needing affordable, fast execution tools.",
+                persona_name="Independent Specialists & Solo Operators",
+                target_profile="Individual professionals needing affordable, instant setup.",
                 key_pain_points=[
-                    "Limited budget for expensive software",
-                    "Need instant results without long setup time"
+                    "Constrained software budgets",
+                    "Need instant self-service without sales calls"
                 ],
-                willingness_to_pay="Moderate ($12 - $29/month)",
+                willingness_to_pay="Moderate ($19 - $39 / month)",
                 acquisition_channels=[
-                    "Social Video Marketing (TikTok, YouTube)",
-                    "Word-of-Mouth & Student Discounts"
+                    "Social Video Marketing & Educational Content",
+                    "Word of Mouth & Direct Referrals"
                 ],
                 buying_triggers=[
-                    "Urgent project deadline or assignment"
+                    "Urgent task demands or client deadlines"
                 ]
             )
         ],
-        segmentation_strategy=f"First capture high-intent users in the '{audience}' segment through Product-Led Growth, then launch team accounts for mid-market upsell."
+        segmentation_strategy=f"Acquire high-intent users in {audience} via product-led freemium, then expand into team collaboration tiers."
     )
     
     comparison = ComparisonData(
         competitor_names=[comp_1_name, comp_2_name],
         comparison_matrix=[
             MatrixComparisonRow(
-                dimension="Pricing Model & Transparency",
-                our_startup=f"Transparent, usage-aligned {rev}",
-                primary_competitor="Expensive annual enterprise contracts",
-                secondary_competitor="Tiered seat limits with add-on fees",
-                our_advantage="Pay-as-you-grow flexibility with zero hidden setup fees"
+                dimension="Pricing & Value",
+                our_startup=f"Transparent, flexible {rev}",
+                primary_competitor="High enterprise contract costs",
+                secondary_competitor="Rigid feature tier caps",
+                our_advantage="Pay-as-you-grow flexibility with zero hidden fees"
             ),
             MatrixComparisonRow(
-                dimension="AI & Multi-Agent Intelligence",
-                our_startup="Autonomous multi-agent synthesis & web research",
-                primary_competitor="Manual entry with rule-based triggers",
-                secondary_competitor="Basic single-prompt AI assistant",
-                our_advantage="End-to-end multi-agent orchestration"
+                dimension="Automation & Speed",
+                our_startup="Native automated workflow engine",
+                primary_competitor="Manual input with legacy triggers",
+                secondary_competitor="Basic single-prompt plugin",
+                our_advantage="End-to-end task automation"
             ),
             MatrixComparisonRow(
-                dimension="Time-to-Value & Onboarding",
-                our_startup="Instant 1-click execution & report generation",
-                primary_competitor="2-4 weeks mandatory onboarding consultation",
-                secondary_competitor="Manual template building required",
-                our_advantage="Zero setup friction with instant actionable reports"
+                dimension="Time-to-Value",
+                our_startup="Instant execution & rapid setup",
+                primary_competitor="Multi-week consulting setup",
+                secondary_competitor="Manual template configuration",
+                our_advantage="Zero-friction setup with immediate output"
             ),
             MatrixComparisonRow(
-                dimension="User Interface & Usability",
-                our_startup="Modern, high-aesthetic Glassmorphism UI",
-                primary_competitor="Cluttered legacy enterprise portal",
-                secondary_competitor="Basic web form interface",
-                our_advantage="State-of-the-art interactive workspace & clear metrics"
+                dimension="User Experience",
+                our_startup="Modern, intuitive single-screen UI",
+                primary_competitor="Cluttered legacy interface",
+                secondary_competitor="Basic form layout",
+                our_advantage="Clean workspace with clear actionable insights"
             ),
             MatrixComparisonRow(
-                dimension="Defensible Strategic Moat",
-                our_startup=f"Proprietary workflow & vertical data loop for {audience}",
-                primary_competitor="High legacy technical debt",
-                secondary_competitor="Indie wrapper vulnerable to copycats",
-                our_advantage="Deep domain integration & multi-agent network feedback"
+                dimension="Domain Specialization",
+                our_startup=f"Built specifically for {audience}",
+                primary_competitor="Generic enterprise tool",
+                secondary_competitor="Narrow feature set",
+                our_advantage=f"Tailored to {ind} domain workflows"
             )
         ],
-        positioning_summary=f"{startup_name} effectively bridges the gap between complex enterprise software ({comp_1_name}) and basic single-purpose tools ({comp_2_name}), delivering enterprise-grade AI depth with consumer-grade simplicity."
+        positioning_summary=f"{startup_name} combines modern automation with simplicity, delivering high-impact results for {audience} without enterprise complexity."
     )
     
     return ValidationReportResponse(
         summary=StartupSummary(
-            high_level_description=f"{startup_name} is an innovative project designed to operate within the {ind} industry. The solution aims to directly address the problem where users face: '{prob}'. By leveraging '{sol}', the venture creates a highly customized experience for users.",
-            target_market_summary=f"The primary target market consists of {audience}. Current market indicators suggest a growing demand for customized, AI-integrated solutions in the {ind} domain, driven by a global shift towards automation, digital efficiency, and user-centric systems.",
+            high_level_description=f"{startup_name} solves key operational pain points in {ind} by providing {sol} specifically designed for {audience}.",
+            target_market_summary=f"Serves {audience} in the growing {ind} market with strong demand for automated solutions.",
             feasibility_verdict=verdict
         ),
         extracted_idea=ExtractedIdea(
@@ -193,65 +197,64 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             target_audience=audience,
             industry=ind,
             revenue_model=rev,
-            value_proposition=f"Provides a friction-free, modern approach to {sol[:80]}... which solves {prob[:80]}... for {audience} with a sustainable {rev} model."
+            value_proposition=f"Delivers frictionless, automated results to eliminate operational friction for {audience}."
         ),
         market_research=MarketResearchData(
-            demand_analysis=f"Our analysis indicates a strong macro-trend in the {ind} space. Search interest highlights that {audience} are actively seeking products that address scheduling, manual overhead, and workflow optimization. The rise of generative AI tools has set a high standard, prompting users to expect proactive solutions rather than manual configuration dashboards.",
+            demand_analysis=f"Strong market demand in {ind} as {audience} actively seek modern automation tools over manual legacy processes.",
             industry_trends=[
-                f"Accelerated integration of Generative AI assistants in the {ind} sector.",
-                f"Shift from desktop-first enterprise portals to context-aware, mobile-first apps for {audience}.",
-                "Increasing demand for subscription-based micro-services with transparent pricing.",
-                "High priority on data privacy, secure API keys, and compliance."
+                f"Rapid adoption of automated workflows across {ind}",
+                f"Shift toward intuitive cloud tools for {audience}",
+                "Growing focus on operational speed and cost reduction",
+                "High customer demand for transparent subscription pricing"
             ],
             opportunities=[
-                f"Capturing the underserved segment of {audience} who find existing tools too complex.",
-                f"Expanding the core solution to adjacent workflows within the {ind} industry.",
-                "Offering premium analytical reports and team collaboration add-ons.",
-                "Partnerships with existing platform ecosystems to offer native integrations."
+                f"Capturing underserved {audience} frustrated by complex tools",
+                f"Expanding core solution across complementary {ind} workflows",
+                "Offering value-add analytics and team features",
+                "Building integrations into popular ecosystem platforms"
             ],
             customer_pain_points=[
-                "Steep learning curves and high cost of existing premium alternatives.",
-                "Lack of customization and context-awareness in legacy platforms.",
-                "Scattered tools requiring constant switching and copy-pasting.",
-                "High manual overhead required to keep data synchronized."
+                "High cost and complexity of legacy alternatives",
+                "Inflexible tools requiring manual workarounds",
+                "Fragmented software requiring constant manual switching",
+                "Slow onboarding and long setup delays"
             ],
             sources=[
-                "https://www.statista.com/search/?q=" + ind_kw.lower(),
-                "https://trends.google.com/trends/explore?q=" + ind_kw.lower() + "+software",
-                "https://www.g2.com/categories/" + ind_kw.lower().replace("&", "-")
+                f"https://statista.com/topics/{ind_keyword.lower()}",
+                f"https://trends.google.com/explore?q={ind_keyword.lower()}+software"
             ]
         ),
         market_opportunity=market_opportunity,
         customer_segmentation=customer_segmentation,
         competitor_analysis=CompetitorAnalysisData(
             competitors=competitors_list,
-            unique_moat=f"Our core defensibility relies on a highly verticalized approach tailored for {audience}, combined with a proprietary workflow that minimizes the user's manual configuration. By integrating search intelligence and structured parsing directly into {sol[:50]}, we create a feedback loop that competitors cannot easily replicate without rebuilding their legacy architectures."
+            unique_moat=f"Specialized workflow automation for {audience} combined with frictionless onboarding that legacy incumbents cannot easily copy."
         ),
         comparison=comparison,
         swot_analysis=SwotAnalysis(
             strengths=[
-                f"Highly aligned solution architecture targeting the core issue of '{prob[:50]}...'",
-                f"Tailored specifically to the distinct pain points of {audience}.",
-                "Modern multi-agent AI framework allowing real-time adjustments and analysis.",
-                f"Flexible {rev} model lowering the barrier to entry."
+                f"Directly solves core user pain point in {ind}",
+                f"Tailored specifically for {audience}",
+                "Modern automated architecture delivering fast execution",
+                f"Flexible {rev} model lowering customer barrier to entry"
             ],
             weaknesses=[
-                "Dependence on third-party LLMs and external search engines for real-time analysis.",
-                "Initial lack of brand presence in a competitive space.",
-                "High dependency on continuous user adoption to build a data network effect.",
-                "Potential operational complexity in scaling multi-agent tasks for complex inputs."
+                "New brand entering an established market",
+                "Initial feature set focused on core use cases",
+                "Need for ongoing user feedback loop calibration",
+                "Building early customer awareness and trust"
             ],
             opportunities=[
-                f"First-mover advantage in using multi-agent workflows for {ind} validation.",
-                "Opportunity to upsell enterprise-tier validation features and compliance checks.",
-                "Expanding integration into popular collaboration tools (Slack, Teams, Discord).",
-                "Monetizing anonymized aggregated industry trends and research insights."
+                f"First-mover advantage in automated solutions for {ind}",
+                "Expanding into team and enterprise feature tiers",
+                "Integrating with popular industry software tools",
+                "Building a strong community of early advocates"
             ],
             threats=[
-                "Rapid commoditization of basic AI wrappers leading to copycat entries.",
-                "Incumbents with deep pockets rapidly copying the core features.",
-                "Changes in data security regulations limiting real-time web scraping and data processing.",
-                "Fluctuations in AI API pricing affecting operating margins."
+                "Incumbents adding automated features to existing suites",
+                "Emergence of generic software wrappers",
+                "Evolving security and compliance standards",
+                "Shifts in customer acquisition costs"
             ]
         ),
         validation_scores=ValidationScores(
@@ -264,10 +267,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             overall_score=overall_score
         ),
         ai_recommendations=[
-            f"1. Build a Simple MVP: Create a single-feature prototype of {sol[:60]}... specifically focused on {audience} to validate core user engagement.",
-            f"2. Conduct Beta Testing: Launch a closed beta with 50 early adopters to refine product UI and address initial friction points.",
-            f"3. Establish Revenue Funnel: Validate the {rev} model early by testing pre-orders or offering a freemium tier with low subscription fees.",
-            f"4. Refine Defensibility Moat: Focus on securing user data loops and build specialized integrations hard for generic competitors to copy.",
-            f"5. Enhance Content Marketing: Target long-tail search terms related to '{prob[:40]}...' to attract organic search traffic without high advertising costs."
+            f"1. Build Lean MVP: Launch core automated solution focused on primary use case for {audience}.",
+            "2. Conduct Beta Testing: Onboard 20-30 target users to gather immediate feedback and refine UX.",
+            f"3. Validate Pricing: Test initial willingness to pay under the proposed {rev} model.",
+            "4. Strengthen Moat: Focus on proprietary workflow speed and seamless user onboarding.",
+            f"5. Focus Acquisition: Build targeted organic content highlighting solution benefits for {audience}."
         ]
     )
+
+

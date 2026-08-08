@@ -1,6 +1,6 @@
 # ValiStart - AI Startup Idea Validator
 
-Developed as an **Infosys Springboard ** project, **ValiStart** is a full-stack, AI-powered web application that helps entrepreneurs, innovators, and students validate their business concepts using cooperative Large Language Model (LLM) agents and live web search.
+**ValiStart** is a full-stack, AI-powered web application that helps entrepreneurs, innovators, and students validate their business concepts using cooperative Large Language Model (LLM) agents and live web search.
 
 The application features a modern, responsive **SaaS-style dashboard** that evaluates problem-solution fit, scans real-time competitors, compiles SWOT metrics, and assigns dynamic validation ratings.
 

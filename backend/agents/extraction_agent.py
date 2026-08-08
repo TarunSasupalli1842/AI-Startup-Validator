@@ -16,29 +16,29 @@ class ExtractionAgent:
         logger.info(f"[{self.name}] starting refinement for startup: '{raw_input.get('name')}'")
         
         prompt = f"""
-        Refine and structure the following startup inputs:
+        Refine and structure the following startup inputs cleanly:
         Startup Name: {raw_input.get('name')}
         Problem Statement: {raw_input.get('problem')}
         Proposed Solution: {raw_input.get('solution')}
         Target Audience: {raw_input.get('target_audience')}
         Industry/Domain: {raw_input.get('industry')}
-        Revenue Model: {raw_input.get('revenue_model') or "Not provided. Based on the startup concept, brainstorm and propose the most suitable revenue model."}
+        Revenue Model: {raw_input.get('revenue_model') or "Not provided. Propose the single best revenue model."}
         Additional Notes: {raw_input.get('additional_notes') or "None"}
         
-        Create a concise value proposition based on the problem, solution, audience, and industry.
+        Keep every field direct, accurate, and concise (1 clear sentence max per field). Avoid long filler matter.
         Return the response strictly as a JSON object matching this schema:
         {{
-            "startup_name": "refined name",
-            "core_problem": "refined core problem statement",
-            "core_solution": "refined core solution statement",
-            "target_audience": "refined target audience details",
-            "industry": "refined industry name",
-            "revenue_model": "refined revenue model details (brainstormed if not provided)",
-            "value_proposition": "a short impact-driven value proposition sentence"
+            "startup_name": "refined concise name",
+            "core_problem": "concise, direct core problem statement",
+            "core_solution": "concise, direct core solution statement",
+            "target_audience": "concise target audience profile",
+            "industry": "concise industry name",
+            "revenue_model": "concise revenue model",
+            "value_proposition": "one crisp, high-impact value proposition sentence"
         }}
         """
         
-        system_instruction = "You are an expert startup analyst. Your task is to clean, structure, and summarize raw startup concept descriptions into high-quality, professional summaries. If the revenue model is not provided, brainstorm and suggest the most logical revenue model option based on standard startup patterns."
+        system_instruction = "You are a concise startup analyst. Keep all output crisp, direct, accurate, and genuine to the startup idea. Eliminate all generic introductory fluff and filler words."
         
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

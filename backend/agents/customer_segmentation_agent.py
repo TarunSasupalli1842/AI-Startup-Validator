@@ -16,81 +16,68 @@ class CustomerSegmentationAgent:
         logger.info(f"[{self.name}] mapping customer personas for startup: '{idea.startup_name}'")
 
         prompt = f"""
-        Build a comprehensive Customer Segmentation profile for the startup idea:
-        
+        Build Customer Segmentation for:
         Startup Name: {idea.startup_name}
         Core Problem: {idea.core_problem}
-        Core Solution: {idea.core_solution}
+        Proposed Solution: {idea.core_solution}
         Target Audience: {idea.target_audience}
         Industry: {idea.industry}
-        Revenue Model: {idea.revenue_model}
-        Value Proposition: {idea.value_proposition}
         
-        Identify:
-        1. Primary Ideal Customer Profile (ICP Persona)
-        2. At least 2 Secondary Customer Personas
-        3. Strategic Customer Acquisition and Segmentation Strategy
-        
-        Return the response strictly as a JSON object matching this schema:
+        Keep all profiles, pain points, channels, and strategy concise (max 10 words per bullet, 1 short sentence per profile).
+        Return strictly a JSON object matching this schema:
         {{
             "primary_segment": {{
-                "persona_name": "Name of Persona (e.g., Tech-Forward Freelancers / SMB Founders)",
-                "target_profile": "Demographic, role, company size, and behavioral characteristics.",
+                "persona_name": "Concise Persona Name",
+                "target_profile": "1 short sentence profile.",
                 "key_pain_points": [
-                    "pain point 1",
-                    "pain point 2",
-                    "pain point 3"
+                    "crisp pain point 1",
+                    "crisp pain point 2"
                 ],
-                "willingness_to_pay": "High ($XX - $XXX / mo) with rationale",
+                "willingness_to_pay": "High ($XX - $XXX/mo)",
                 "acquisition_channels": [
                     "channel 1",
-                    "channel 2",
-                    "channel 3"
+                    "channel 2"
                 ],
                 "buying_triggers": [
-                    "trigger 1 - e.g. missed deadline or software bloat",
-                    "trigger 2"
+                    "crisp trigger 1",
+                    "crisp trigger 2"
                 ]
             }},
             "secondary_segments": [
                 {{
                     "persona_name": "Secondary Persona Name",
-                    "target_profile": "Demographic / firmographic profile.",
+                    "target_profile": "1 short sentence profile.",
                     "key_pain_points": [
-                        "pain point 1",
-                        "pain point 2"
+                        "crisp pain point 1"
                     ],
-                    "willingness_to_pay": "Medium ($XX - $XX / mo)",
+                    "willingness_to_pay": "Medium ($XX - $XX/mo)",
                     "acquisition_channels": [
-                        "channel 1",
-                        "channel 2"
+                        "channel 1"
                     ],
                     "buying_triggers": [
-                        "trigger 1"
+                        "crisp trigger 1"
                     ]
                 }},
                 {{
-                    "persona_name": "Growth / Enterprise Persona Name",
-                    "target_profile": "Demographic / firmographic profile.",
+                    "persona_name": "Growth Persona Name",
+                    "target_profile": "1 short sentence profile.",
                     "key_pain_points": [
-                        "pain point 1",
-                        "pain point 2"
+                        "crisp pain point 1"
                     ],
-                    "willingness_to_pay": "Very High ($XXX+ / mo)",
+                    "willingness_to_pay": "Very High ($XXX+/mo)",
                     "acquisition_channels": [
-                        "channel 1",
-                        "channel 2"
+                        "channel 1"
                     ],
                     "buying_triggers": [
-                        "trigger 1"
+                        "crisp trigger 1"
                     ]
                 }}
             ],
-            "segmentation_strategy": "A 2-3 sentence strategic roadmap for targeting and scaling across these customer segments."
+            "segmentation_strategy": "1 crisp sentence go-to-market customer roadmap."
         }}
         """
 
-        system_instruction = "You are a customer discovery and user persona expert. Create detailed, actionable customer personas with clear acquisition channels and willingness to pay metrics."
+        system_instruction = "You are a customer discovery expert. Keep personas and customer strategies direct, accurate, and concise without wordy filler."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

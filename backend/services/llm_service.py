@@ -14,7 +14,7 @@ async def call_gemini(prompt: str, expect_json: bool = False, system_instruction
         logger.warning("Gemini API key is not configured in .env. Skipping LLM request.")
         raise ValueError("Gemini API key not configured.")
         
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={settings.GEMINI_API_KEY}"
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key={settings.GEMINI_API_KEY}"
     
     # Configure safety settings and prompt parameters
     contents = []

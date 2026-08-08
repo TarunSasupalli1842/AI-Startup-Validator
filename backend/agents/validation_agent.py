@@ -72,42 +72,47 @@ class ValidationAgent:
         """
         
         prompt = f"""
-        Synthesize a comprehensive final Startup Validation Report from the multi-agent findings below:
+        Synthesize the final Startup Validation Report from findings below:
         {context}
         
-        Calculate honest validation scores (0 to 100 range), build a 4-quadrant SWOT analysis, and formulate 5 highly strategic, actionable recommendations for building and scaling the startup.
+        STRICT REQUIREMENT: Be extremely concise, direct, accurate, and genuine. Avoid long matter, wordy filler, or repetitive text.
+        - high_level_description: 1 concise sentence describing concept, problem solved, and solution.
+        - target_market_summary: 1 concise sentence on market sizing and target customer opportunity.
+        - feasibility_verdict: Short assessment title followed by 1 short rationale sentence.
+        - swot_analysis: Crisp bullet points (max 10 words per bullet).
+        - ai_recommendations: 5 direct, 1-sentence action steps.
         
-        Return the response strictly as a JSON object matching this schema:
+        Return strictly a JSON object matching this schema:
         {{
             "summary": {{
-                "high_level_description": "A comprehensive 2-3 sentence description of the startup concept, market positioning, and revenue model.",
-                "target_market_summary": "A 2-3 sentence overview of target market sizing (TAM/SOM), primary persona willingness to pay, and market growth momentum.",
-                "feasibility_verdict": "A clear assessment (e.g. Excellent Viability / Strong Potential / Moderate Feasibility) along with a concise 2-sentence rationale."
+                "high_level_description": "1 concise sentence overview of startup concept.",
+                "target_market_summary": "1 concise sentence overview of target market.",
+                "feasibility_verdict": "High Viability. 1 short rationale sentence."
             }},
             "swot_analysis": {{
                 "strengths": [
-                    "strength 1 - core internal edge, unique tech, skill or alignment",
-                    "strength 2",
-                    "strength 3",
-                    "strength 4"
+                    "crisp strength 1 (max 10 words)",
+                    "crisp strength 2",
+                    "crisp strength 3",
+                    "crisp strength 4"
                 ],
                 "weaknesses": [
-                    "weakness 1 - early execution gaps, dependency risk, or pricing model validation needs",
-                    "weakness 2",
-                    "weakness 3",
-                    "weakness 4"
+                    "crisp weakness 1 (max 10 words)",
+                    "crisp weakness 2",
+                    "crisp weakness 3",
+                    "crisp weakness 4"
                 ],
                 "opportunities": [
-                    "opportunity 1 - macro market trend, expansion tier, or partnership potential",
-                    "opportunity 2",
-                    "opportunity 3",
-                    "opportunity 4"
+                    "crisp opportunity 1 (max 10 words)",
+                    "crisp opportunity 2",
+                    "crisp opportunity 3",
+                    "crisp opportunity 4"
                 ],
                 "threats": [
-                    "threat 1 - market competition, tech commoditization, or regulatory hurdles",
-                    "threat 2",
-                    "threat 3",
-                    "threat 4"
+                    "crisp threat 1 (max 10 words)",
+                    "crisp threat 2",
+                    "crisp threat 3",
+                    "crisp threat 4"
                 ]
             }},
             "validation_scores": {{
@@ -120,16 +125,16 @@ class ValidationAgent:
                 "overall_score": 82
             }},
             "ai_recommendations": [
-                "1. Build & Test MVP: ...",
-                "2. Customer Acquisition: ...",
-                "3. Revenue Optimization: ...",
-                "4. Defensive Moat: ...",
-                "5. Scalability & Integrations: ..."
+                "1. Lean MVP: Build prototype for core solution.",
+                "2. User Testing: Test with 20 early target users.",
+                "3. Monetization Test: Validate willingness to pay.",
+                "4. Defensibility: Focus on proprietary workflow speed.",
+                "5. Acquisition Channel: Leverage targeted organic channels."
             ]
         }}
         """
         
-        system_instruction = "You are a seasoned startup incubator director and venture capital analyst. Provide rigorous, objective validation scores and clear, actionable growth recommendations."
+        system_instruction = "You are a concise startup incubator analyst. Synthesize reports with extreme clarity, precision, and zero fluff."
         
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

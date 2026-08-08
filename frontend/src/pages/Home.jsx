@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   Sparkles, ShieldCheck, Cpu, Search, TrendingUp, AlertCircle, 
-  HelpCircle, Lightbulb, Compass, Award, ArrowRight
+  HelpCircle, Lightbulb, Compass, Award, ArrowRight, Zap, Check, Play, Globe, Layers, BarChart3
 } from 'lucide-react';
 import { validateStartupIdea } from '../services/api';
 import LoadingScreen from '../components/LoadingScreen';
@@ -11,6 +11,7 @@ export default function Home() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [selectedSample, setSelectedSample] = useState(null);
   
   const [formData, setFormData] = useState({
     name: "",
@@ -21,6 +22,61 @@ export default function Home() {
     revenue_model: "",
     additional_notes: ""
   });
+
+  const sampleIdeas = [
+    {
+      label: "🌱 AgriScan AI",
+      tag: "AgTech",
+      badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
+      data: {
+        name: "AgriScan AI",
+        industry: "AgTech / AI Crop Health",
+        target_audience: "Small-scale & organic farmers",
+        problem: "Small-scale farmers lose up to 30% of crop yield due to delayed crop disease diagnosis and lack of affordable agronomist consultation.",
+        solution: "A smartphone app using computer vision to instantly identify crop diseases from leaf photos and provide localized organic treatment plans.",
+        revenue_model: "Freemium & B2B Ag-retail subscription",
+        additional_notes: "Targeting small agricultural operators needing fast disease diagnosis."
+      }
+    },
+    {
+      label: "⚡ ChargePulse",
+      tag: "CleanTech",
+      badgeColor: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30",
+      data: {
+        name: "ChargePulse",
+        industry: "CleanTech / EV Infrastructure",
+        target_audience: "Commercial real estate & EV station hubs",
+        problem: "EV charging station operators face high grid peak demand charges and station downtime due to unoptimized energy distribution.",
+        solution: "Smart AI energy management platform for EV hubs that balances dynamic grid loads and optimizes battery storage charging during off-peak hours.",
+        revenue_model: "SaaS Subscription + Energy Arbitrage Share",
+        additional_notes: "Uses OCPP open charging protocols."
+      }
+    },
+    {
+      label: "🩺 MedScript AI",
+      tag: "HealthTech",
+      badgeColor: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30",
+      data: {
+        name: "MedScript AI",
+        industry: "Healthcare / Clinical AI",
+        target_audience: "Independent clinics & outpatient physicians",
+        problem: "Doctors spend 2+ hours daily on manual EHR clinical documentation, leading to physician burnout and administrative overhead.",
+        solution: "Ambient voice AI assistant that transcribes patient visits in real-time, auto-populates SOAP notes, and generates HIPAA-compliant summaries.",
+        revenue_model: "Monthly SaaS subscription per physician seat",
+        additional_notes: "Designed for seamless integration with clinical workflows."
+      }
+    }
+  ];
+
+  const handleSelectSample = (sample, idx) => {
+    setFormData(sample.data);
+    setSelectedSample(idx);
+    setError("");
+    const validatorElement = document.getElementById('validator');
+    if (validatorElement) {
+      validatorElement.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -62,39 +118,95 @@ export default function Home() {
       {loading && <LoadingScreen />}
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden pt-20 pb-16 lg:pt-32 lg:pb-24">
+      <section className="relative overflow-hidden pt-16 pb-16 lg:pt-24 lg:pb-20">
+        {/* Ambient background glow spheres */}
+        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[700px] h-[350px] bg-gradient-to-r from-brand-500/20 via-accentViolet-500/20 to-accentCyan-500/20 blur-[120px] pointer-events-none rounded-full" />
+
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-brand-100 text-brand-700 dark:bg-brand-950/60 dark:text-brand-300 border border-brand-200/20 text-xs font-semibold mb-6 animate-pulse-slow">
-            <Sparkles className="w-4.5 h-4.5" />
-            <span>AI Multi-Agent Startup Validator</span>
+          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-brand-500/10 via-indigo-500/10 to-accentViolet-500/10 border border-brand-500/30 text-xs font-bold text-brand-700 dark:text-brand-300 mb-8 shadow-sm">
+            <Sparkles className="w-4 h-4 text-brand-500 animate-pulse-slow" />
+            <span className="tracking-wide uppercase">AI Multi-Agent Startup Validator</span>
           </div>
           
-          <h1 className="font-display font-bold text-4xl sm:text-6xl tracking-tight text-slate-900 dark:text-white leading-tight max-w-4xl mx-auto">
+          <h1 className="font-display font-extrabold text-4xl sm:text-6xl lg:text-7xl tracking-tight text-slate-900 dark:text-white leading-[1.12] max-w-5xl mx-auto">
             Validate Your Startup Idea with{" "}
-            <span className="bg-gradient-to-r from-brand-600 to-indigo-500 bg-clip-text text-transparent dark:from-brand-400 dark:to-indigo-400">
-              Multi-Agent AI
+            <span className="bg-gradient-to-r from-brand-500 via-indigo-500 via-accentViolet-500 to-accentCyan-500 bg-clip-text text-transparent">
+              Autonomous AI Swarms
             </span>
           </h1>
           
-          <p className="mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-2xl mx-auto leading-relaxed">
-            Get an instant, live market-validated analysis of your business concept. Our cooperative AI agent swarm queries the web, maps competitors, constructs SWOT tables, and computes feasibility scores.
+          <p className="mt-6 text-base sm:text-lg text-slate-600 dark:text-slate-300 max-w-3xl mx-auto leading-relaxed font-medium">
+            Get instant, live market-validated intelligence for your venture. Our 7-stage AI agent pipeline queries real-time web search, maps competitors, calculates unit economics, and delivers concise, accurate reports.
           </p>
+
+          {/* Key Metric Pills */}
+          <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-bold text-slate-600 dark:text-slate-300">
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+              <Layers className="w-4 h-4 text-brand-500" />
+              <span>7 AI Swarm Agents</span>
+            </div>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+              <Globe className="w-4 h-4 text-cyan-500" />
+              <span>Live Web Intelligence</span>
+            </div>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+              <BarChart3 className="w-4 h-4 text-emerald-500" />
+              <span>TAM & Unit Economics</span>
+            </div>
+            <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-white/70 dark:bg-slate-900/60 border border-slate-200/80 dark:border-slate-800 shadow-sm">
+              <Zap className="w-4 h-4 text-amber-500" />
+              <span>Instant Scoring</span>
+            </div>
+          </div>
 
           <div className="mt-10 flex flex-wrap justify-center gap-4">
             <a
               href="#validator"
-              className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-white bg-brand-600 rounded-2xl hover:bg-brand-700 hover:shadow-lg hover:shadow-brand-500/20 active:scale-95 transition-all duration-200"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-white bg-gradient-to-r from-brand-600 via-indigo-600 to-accentViolet-600 rounded-2xl hover:shadow-xl hover:shadow-brand-500/25 hover:scale-[1.02] active:scale-95 transition-all duration-200"
             >
               Start Validating Free
               <ArrowRight className="w-5 h-5 ml-2" />
             </a>
             <a
               href="#about"
-              className="inline-flex items-center justify-center px-6 py-3.5 text-base font-semibold text-slate-700 bg-white border border-slate-200 rounded-2xl hover:bg-slate-50 dark:bg-slate-900 dark:text-slate-200 dark:border-slate-800 dark:hover:bg-slate-900/80 transition-all duration-200"
+              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-700 bg-white/80 border border-slate-200/80 rounded-2xl hover:bg-slate-50 dark:bg-slate-900/80 dark:text-slate-200 dark:border-slate-800 dark:hover:bg-slate-800 transition-all duration-200 shadow-sm"
             >
-              Learn How It Works
+              Explore 7 AI Agents
             </a>
           </div>
+
+          {/* QUICK TEST SAMPLE IDEAS BAR */}
+          <div className="mt-12 max-w-4xl mx-auto p-4 rounded-3xl bg-white/60 dark:bg-slate-900/40 border border-slate-200/60 dark:border-slate-800/60 backdrop-blur-md">
+            <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 mb-3">
+              <Play className="w-3.5 h-3.5 text-brand-500 fill-brand-500" />
+              <span>Try a Sample Idea (Click to Auto-Fill Form):</span>
+            </div>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              {sampleIdeas.map((sample, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleSelectSample(sample, idx)}
+                  className={`p-3 rounded-2xl border text-left transition-all duration-200 flex flex-col justify-between ${
+                    selectedSample === idx
+                      ? 'bg-brand-500/10 border-brand-500 shadow-md ring-2 ring-brand-500/20'
+                      : 'bg-white/80 dark:bg-slate-900/70 border-slate-200/80 dark:border-slate-800 hover:border-brand-400 hover:-translate-y-0.5'
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="font-bold text-xs text-slate-900 dark:text-white">{sample.label}</span>
+                    <span className={`text-[9px] font-extrabold px-2 py-0.5 rounded-full border ${sample.badgeColor}`}>
+                      {sample.tag}
+                    </span>
+                  </div>
+                  <p className="text-[11px] text-slate-500 dark:text-slate-400 mt-1 line-clamp-1 font-medium">
+                    {sample.data.industry}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+
         </div>
       </section>
 
