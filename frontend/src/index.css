@@ -30,29 +30,97 @@
 .mesh-gradient-dark {
   background-color: #020f11;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.16) 0px, transparent 50%),
-    radial-gradient(at 50% 0%, rgba(6, 182, 212, 0.1) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.08) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.22) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.15) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.12) 0px, transparent 50%);
 }
 
 .mesh-gradient-light {
   background-color: #f6fcfa;
   background-image: 
-    radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.07) 0px, transparent 50%),
-    radial-gradient(at 50% 0%, rgba(6, 182, 212, 0.05) 0px, transparent 50%),
-    radial-gradient(at 100% 100%, rgba(99, 102, 241, 0.03) 0px, transparent 50%);
+    radial-gradient(at 0% 0%, rgba(13, 148, 136, 0.08) 0px, transparent 50%),
+    radial-gradient(at 50% 0%, rgba(99, 102, 241, 0.06) 0px, transparent 50%),
+    radial-gradient(at 100% 100%, rgba(6, 182, 212, 0.05) 0px, transparent 50%);
 }
 
 /* Glassmorphism cards */
 .glass-card {
-  @apply bg-white/70 backdrop-blur-md border border-slate-200/60 shadow-sm dark:bg-slate-900/50 dark:border-slate-800/60;
+  @apply bg-white/80 backdrop-blur-xl border border-slate-200/70 shadow-sm dark:bg-slate-900/60 dark:border-slate-800/80;
 }
 
 .glass-card-hover {
-  @apply transition-all duration-300 hover:shadow-md hover:border-slate-300/80 dark:hover:border-slate-700/80 hover:-translate-y-0.5;
+  @apply transition-all duration-300 hover:shadow-xl hover:shadow-brand-500/5 hover:border-slate-300 dark:hover:border-slate-700 hover:-translate-y-1;
+}
+
+.glass-card-active {
+  @apply bg-white dark:bg-slate-900 border-brand-500/50 shadow-lg shadow-brand-500/10 dark:border-brand-500/50;
+}
+
+/* Custom glowing borders */
+.glow-border-brand {
+  position: relative;
+}
+.glow-border-brand::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, rgba(13, 148, 136, 0.6), rgba(99, 102, 241, 0.6), rgba(6, 182, 212, 0.6));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
 }
 
 /* Custom dashboard items */
 .swot-card {
-  @apply p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 hover:shadow-sm;
+  @apply p-6 rounded-3xl border transition-all duration-300 hover:-translate-y-1 hover:shadow-lg;
+}
+
+/* Custom scrollbar utility */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  @apply bg-slate-400/40 dark:bg-slate-700/60 rounded-full;
+}
+
+/* Shimmer overlay animation */
+.shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+.shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  transform: translateX(-100%);
+  background-image: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0,
+    rgba(255, 255, 255, 0.08) 20%,
+    rgba(255, 255, 255, 0.2) 60%,
+    rgba(255, 255, 255, 0)
+  );
+  animation: shimmer 2.5s infinite;
+}
+
+/* Print Optimization */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  nav, footer, .no-print {
+    display: none !important;
+  }
+  .glass-card {
+    border: 1px solid #e2e8f0 !important;
+    box-shadow: none !important;
+    background: white !important;
+  }
 }
