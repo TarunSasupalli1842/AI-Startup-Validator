@@ -129,13 +129,13 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-10">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-brand-500/10 via-indigo-500/10 to-accentViolet-500/10 border border-brand-500/30 text-xs font-bold text-brand-700 dark:text-brand-300 mb-8 shadow-sm">
             <Sparkles className="w-4 h-4 text-brand-500 animate-pulse-slow" />
-            <span className="tracking-wide uppercase">AI Multi-Agent Startup Validator</span>
+            <span className="tracking-wide uppercase">AI-Powered Startup Validator</span>
           </div>
           
           <h1 className="font-display font-black text-4xl sm:text-6xl lg:text-7xl tracking-tight text-slate-900 dark:text-white leading-[1.12] max-w-5xl mx-auto drop-shadow-sm">
-            Validate Your Startup Concept with{" "}
+            Validate and Improve Your{" "}
             <span className="bg-gradient-to-r from-brand-500 via-indigo-500 via-accentViolet-500 to-accentCyan-400 bg-clip-text text-transparent">
-              7 Autonomous AI Agents
+              Business Idea with AI
             </span>
           </h1>
           
@@ -147,7 +147,7 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-extrabold text-slate-700 dark:text-slate-200">
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 shadow-sm backdrop-blur-md">
               <Layers className="w-4 h-4 text-brand-500" />
-              <span>7 Swarm Agents</span>
+              <span>4 Swarm Agents</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 shadow-sm backdrop-blur-md">
               <Globe className="w-4 h-4 text-cyan-500" />
@@ -175,7 +175,7 @@ export default function Home() {
               href="#about"
               className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-700 bg-white/80 border border-slate-200/80 rounded-2xl hover:bg-slate-50 dark:bg-slate-900/80 dark:text-slate-200 dark:border-slate-800 dark:hover:bg-slate-800 transition-all duration-200 shadow-sm"
             >
-              Explore 7 AI Agents
+              Explore 4 AI Agents
             </a>
           </div>
 
@@ -225,25 +225,24 @@ export default function Home() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">
-              Cooperative Multi-Agent Intelligence
+              Cooperative Multi-Agent Swarm Intelligence
             </span>
             <h2 className="font-display font-black text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-white mt-2">
-              7 Specialized AI Agents Working in Sequence
+              Specialized AI Agents Working in Orchestration
             </h2>
             <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-              Instead of relying on a single prompt, ValiStart breaks validation into seven specialized LLM calls that build rich contextual intelligence step by step.
+              Instead of relying on a single generic prompt, ValiStart orchestrates specialized AI agents that build rich contextual intelligence across market research, risk audit, MoSCoW MVP, GTM roadmap, and conversational advisory.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
             {[
-              { num: "01", name: "Extraction Agent", desc: "Isolates value propositions, audience demographics, and core problem vectors from unstructured input.", color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
-              { num: "02", name: "Market Research Agent", desc: "Queries Tavily search indexes to fetch live macro industry trends, growth metrics, and customer pain points.", color: "text-cyan-500 bg-cyan-500/10 border-cyan-500/20" },
-              { num: "03", name: "Market Opportunity Agent", desc: "Calculates addressable TAM, SAM, SOM estimates, CAGR growth metrics, and unit economics.", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
-              { num: "04", name: "Customer Persona Agent", desc: "Profiles Ideal Customer Profiles (ICPs), willingness to pay, and primary customer acquisition channels.", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
-              { num: "05", name: "Competitor Agent", desc: "Scans active search engines to catalog direct/indirect competitors, strengths, weaknesses, and moats.", color: "text-rose-500 bg-rose-500/10 border-rose-500/20" },
-              { num: "06", name: "Comparison Matrix Agent", desc: "Builds a dimensional head-to-head feature matrix positioning your venture against existing players.", color: "text-indigo-500 bg-indigo-500/10 border-indigo-500/20" },
-              { num: "07", name: "Validation Synthesis Agent", desc: "Synthesizes multi-agent intelligence, calculates score gauges, formats SWOT grid, and maps AI action plan.", color: "text-teal-500 bg-teal-500/10 border-teal-500/20" },
+              { num: "01", name: "Extraction & Market Research", desc: "Isolates value propositions and queries live web search for macro industry growth & customer demand.", color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
+              { num: "02", name: "Competitor & Moat Analysis", desc: "Catalogues market alternatives, calculates feature matrices, and evaluates defensible competitive moats.", color: "text-rose-500 bg-rose-500/10 border-rose-500/20" },
+              { num: "03", name: "SWOT Analysis Agent", desc: "Performs deep LLM reasoning across internal strengths, vulnerabilities, market tailwinds, and macro threats.", color: "text-blue-500 bg-blue-500/10 border-blue-500/20" },
+              { num: "04", name: "Multi-Pillar Risk Agent", desc: "Audits 6 risk domains (Market, Competitor, Financial, Tech, Ops, Customer) with probability & mitigations.", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
+              { num: "05", name: "MoSCoW MVP Roadmap", desc: "Categorizes features strictly into Must-Have, Should-Have, Could-Have, and Won't-Have build roadmaps.", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
+              { num: "06", name: "GTM & Conversational Advisor", desc: "Formulates positioning, acquisition funnels, launch steps, and provides an interactive chatbot advisor.", color: "text-teal-500 bg-teal-500/10 border-teal-500/20" },
             ].map((agent, idx) => (
               <div key={idx} className="glass-card glass-card-hover p-6 rounded-3xl space-y-3 relative overflow-hidden">
                 <div className="flex items-center justify-between">
@@ -251,7 +250,7 @@ export default function Home() {
                     {agent.num}
                   </div>
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Stage {agent.num}
+                    Agent {agent.num}
                   </span>
                 </div>
                 <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white">
@@ -282,7 +281,7 @@ export default function Home() {
                 Submit Your Startup Idea
               </h2>
               <p className="text-xs sm:text-sm text-brand-100 mt-2 max-w-xl leading-relaxed">
-                Enter your startup concept below. Our 7 AI agents will inspect the market, evaluate problem-solution fit, analyze competitors, and generate your report.
+                Enter your startup concept below. Our 4 AI agents will inspect the market, evaluate problem-solution fit, analyze competitors, and generate your report.
               </p>
             </div>
 
@@ -426,7 +425,7 @@ export default function Home() {
                   className="w-full inline-flex items-center justify-center px-8 py-4 text-base font-extrabold text-white bg-gradient-to-r from-brand-600 via-teal-600 to-indigo-600 rounded-2xl hover:from-brand-700 hover:to-indigo-700 hover:shadow-xl hover:shadow-brand-500/25 active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-lg"
                 >
                   <Sparkles className="w-5 h-5 mr-2 animate-pulse-slow" />
-                  Validate Startup Idea (Run 7 AI Swarm Agents)
+                  Validate Startup Idea (Run 4 AI Swarm Agents)
                 </button>
               </div>
             </form>

@@ -3,15 +3,16 @@ import logging
 from services.llm_service import call_gemini
 from models.validation import (
     ExtractedIdea, MarketResearchData, MarketOpportunityData, CustomerSegmentationData,
-    CompetitorAnalysisData, ComparisonData, ValidationReportResponse, StartupSummary,
-    SwotAnalysis, ValidationScores
+    CompetitorAnalysisData, ComparisonData, SwotAnalysis, RiskAnalysisData,
+    MvpRecommendationData, GtmStrategyData, ValidationReportResponse, StartupSummary,
+    ValidationScores
 )
 
 logger = logging.getLogger(__name__)
 
 class ValidationAgent:
     def __init__(self):
-        self.name = "Validation Agent"
+        self.name = "Validation Synthesis Agent"
         
     async def run(
         self,
@@ -20,11 +21,15 @@ class ValidationAgent:
         opportunity: MarketOpportunityData,
         segmentation: CustomerSegmentationData,
         competitors: CompetitorAnalysisData,
-        comparison: ComparisonData
+        comparison: ComparisonData,
+        swot: SwotAnalysis,
+        risks: RiskAnalysisData,
+        mvp: MvpRecommendationData,
+        gtm: GtmStrategyData
     ) -> ValidationReportResponse:
         """
-        Runs final validation scoring, SWOT analysis, and actionable recommendation synthesis
-        by combining data from all 6 previous specialized pipeline agents.
+        Runs final validation scoring and actionable recommendation synthesis
+        by combining data from all specialized pipeline agents.
         """
         logger.info(f"[{self.name}] starting final report synthesis for: '{idea.startup_name}'")
         
@@ -63,24 +68,47 @@ class ValidationAgent:
         
         [5. COMPETITOR LANDSCAPE]
         Unique Moat: {competitors.unique_moat}
-        Competitors list:
-        {competitors_summary}
+        Competitors: {competitors_summary}
         
         [6. COMPARISON MATRIX]
         Positioning Strategy: {comparison.positioning_summary}
         Key Advantage Points: {", ".join([r.our_advantage for r in comparison.comparison_matrix])}
+
+        [7. SWOT HIGHLIGHTS]
+        Strengths: {", ".join(swot.strengths)}
+        Weaknesses: {", ".join(swot.weaknesses)}
+        Opportunities: {", ".join(swot.opportunities)}
+        Threats: {", ".join(swot.threats)}
+
+        [8. RISK LEVEL]
+        Overall Risk: {risks.overall_risk_level} - {risks.risk_summary}
+
+        [9. MVP ROADMAP]
+        MVP Philosophy: {mvp.mvp_summary}
+        Timeline: {mvp.target_timeline_weeks}
+
+        [10. GTM STRATEGY]
+        Positioning: {gtm.positioning_statement}
+        Pricing: {gtm.pricing_strategy}
         """
         
         prompt = f"""
-        Synthesize the final Startup Validation Report from findings below:
+        Synthesize the final Startup Validation Executive Summary and Multi-Metric Scoring from findings below:
         {context}
         
-        STRICT REQUIREMENT: Be extremely concise, direct, accurate, and genuine. Avoid long matter, wordy filler, or repetitive text.
+        STRICT REQUIREMENT: Be extremely concise, direct, accurate, and genuine. Avoid long matter or repetitive text.
         - high_level_description: 1 concise sentence describing concept, problem solved, and solution.
         - target_market_summary: 1 concise sentence on market sizing and target customer opportunity.
         - feasibility_verdict: Short assessment title followed by 1 short rationale sentence.
-        - swot_analysis: Crisp bullet points (max 10 words per bullet).
-        - ai_recommendations: 5 direct, 1-sentence action steps.
+        - validation_scores: Evaluate realistic 0-100 scores for:
+          * problem_clarity
+          * solution_strength
+          * market_potential
+          * competition_risk (higher number = safer / lower risk)
+          * feasibility
+          * innovation
+          * overall_score (weighted average)
+        - ai_recommendations: 5 direct, actionable 1-sentence next steps.
         
         Return strictly a JSON object matching this schema:
         {{
@@ -88,32 +116,6 @@ class ValidationAgent:
                 "high_level_description": "1 concise sentence overview of startup concept.",
                 "target_market_summary": "1 concise sentence overview of target market.",
                 "feasibility_verdict": "High Viability. 1 short rationale sentence."
-            }},
-            "swot_analysis": {{
-                "strengths": [
-                    "crisp strength 1 (max 10 words)",
-                    "crisp strength 2",
-                    "crisp strength 3",
-                    "crisp strength 4"
-                ],
-                "weaknesses": [
-                    "crisp weakness 1 (max 10 words)",
-                    "crisp weakness 2",
-                    "crisp weakness 3",
-                    "crisp weakness 4"
-                ],
-                "opportunities": [
-                    "crisp opportunity 1 (max 10 words)",
-                    "crisp opportunity 2",
-                    "crisp opportunity 3",
-                    "crisp opportunity 4"
-                ],
-                "threats": [
-                    "crisp threat 1 (max 10 words)",
-                    "crisp threat 2",
-                    "crisp threat 3",
-                    "crisp threat 4"
-                ]
             }},
             "validation_scores": {{
                 "problem_clarity": 88,
@@ -134,7 +136,7 @@ class ValidationAgent:
         }}
         """
         
-        system_instruction = "You are a concise startup incubator analyst. Synthesize reports with extreme clarity, precision, and zero fluff."
+        system_instruction = "You are an elite venture capital analyst and startup incubator judge. Synthesize validation scores and recommendations with surgical precision and honesty."
         
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)
@@ -148,7 +150,10 @@ class ValidationAgent:
                 customer_segmentation=segmentation,
                 competitor_analysis=competitors,
                 comparison=comparison,
-                swot_analysis=SwotAnalysis(**parsed_data.get("swot_analysis", {})),
+                swot_analysis=swot,
+                risk_analysis=risks,
+                mvp_recommendation=mvp,
+                gtm_strategy=gtm,
                 validation_scores=ValidationScores(**parsed_data.get("validation_scores", {})),
                 ai_recommendations=parsed_data.get("ai_recommendations", [])
             )

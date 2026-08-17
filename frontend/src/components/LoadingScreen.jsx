@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Sparkles, CheckCircle2, Circle, Bot, Globe, BarChart3, Users, Shield, Award, Cpu, Activity, Zap } from 'lucide-react';
+import { Sparkles, CheckCircle2, Circle, Bot, Globe, Shield, Cpu, Activity, AlertTriangle, Layers, Rocket } from 'lucide-react';
 
 export default function LoadingScreen() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -7,62 +7,54 @@ export default function LoadingScreen() {
   const steps = [
     {
       title: "01. Extraction Agent",
-      desc: "Deconstructing startup statement, structuring core pillars, and defining value proposition.",
+      desc: "Deconstructing startup statement, isolating core problem-solution vectors, and defining target profile.",
       loadingMsg: "⚙️ Isolating core problem-solution vectors...",
       icon: Cpu,
       color: "text-violet-400 bg-violet-500/10 border-violet-500/30 shadow-violet-500/10"
     },
     {
-      title: "02. Market Research Agent",
-      desc: "Scanning live web search API for macro industry trends, demand metrics, and pain points.",
-      loadingMsg: "🌐 Querying live web search intelligence index...",
+      title: "02. Market Research & TAM Agent",
+      desc: "Scanning live web search for macro industry trends, TAM/SAM/SOM sizing, and customer demand metrics.",
+      loadingMsg: "🌐 Querying live web search intelligence & TAM market data...",
       icon: Globe,
       color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30 shadow-cyan-500/10"
     },
     {
-      title: "03. Market Opportunity Agent",
-      desc: "Calculating TAM, SAM, SOM estimations, CAGR growth trajectory, and unit economics.",
-      loadingMsg: "📊 Computing addressable market size & CAC/LTV...",
-      icon: BarChart3,
-      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-emerald-500/10"
-    },
-    {
-      title: "04. Customer Persona Agent",
-      desc: "Mapping Ideal Customer Profiles (ICPs), willingness to pay, and acquisition channels.",
-      loadingMsg: "🎯 Profiling user personas & conversion triggers...",
-      icon: Users,
-      color: "text-amber-400 bg-amber-500/10 border-amber-500/30 shadow-amber-500/10"
-    },
-    {
-      title: "05. Competitor Analysis Agent",
-      desc: "Cataloging direct and indirect market alternatives and mapping strategic moats.",
-      loadingMsg: "⚔️ Cataloging competitive moats & market alternatives...",
+      title: "03. Competitor Analysis Agent",
+      desc: "Cataloging market alternatives, calculating feature comparison matrix, and mapping defensibility moats.",
+      loadingMsg: "⚔️ Cataloging competitive moats & alternative solutions...",
       icon: Shield,
       color: "text-rose-400 bg-rose-500/10 border-rose-500/30 shadow-rose-500/10"
     },
     {
-      title: "06. Comparison Matrix Agent",
-      desc: "Generating head-to-head feature matrix and positioning roadmap against alternatives.",
-      loadingMsg: "📋 Building dimensional comparison matrix...",
-      icon: Award,
-      color: "text-indigo-400 bg-indigo-500/10 border-indigo-500/30 shadow-indigo-500/10"
+      title: "04. SWOT & Multi-Risk Agent",
+      desc: "Evaluating 6-pillar risks (Market, Competitor, Financial, Tech, Ops, Customer) and SWOT reasoning.",
+      loadingMsg: "⚠️ Analyzing 6 risk pillars and calculating mitigations...",
+      icon: AlertTriangle,
+      color: "text-amber-400 bg-amber-500/10 border-amber-500/30 shadow-amber-500/10"
     },
     {
-      title: "07. Validation Synthesis Agent",
-      desc: "Synthesizing multi-agent data, scoring metrics, SWOT grid, and strategic recommendations.",
-      loadingMsg: "🧠 Synthesizing final scores & SWOT recommendations...",
-      icon: Sparkles,
+      title: "05. MoSCoW MVP Roadmap Agent",
+      desc: "Categorizing MVP features into Must-Have, Should-Have, Could-Have, and Won't-Have buckets.",
+      loadingMsg: "📦 Structuring MoSCoW MVP features & build timeline...",
+      icon: Layers,
+      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-emerald-500/10"
+    },
+    {
+      title: "06. Go-To-Market & Synthesis Agent",
+      desc: "Synthesizing GTM positioning, acquisition channels, launch roadmap, and overall viability scores.",
+      loadingMsg: "🚀 Finalizing GTM playbook & overall venture score...",
+      icon: Rocket,
       color: "text-teal-400 bg-teal-500/10 border-teal-500/30 shadow-teal-500/10"
     }
   ];
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setCurrentStep(1), 2200);
-    const timer2 = setTimeout(() => setCurrentStep(2), 4800);
-    const timer3 = setTimeout(() => setCurrentStep(3), 7400);
-    const timer4 = setTimeout(() => setCurrentStep(4), 10000);
-    const timer5 = setTimeout(() => setCurrentStep(5), 12600);
-    const timer6 = setTimeout(() => setCurrentStep(6), 15200);
+    const timer1 = setTimeout(() => setCurrentStep(1), 2500);
+    const timer2 = setTimeout(() => setCurrentStep(2), 5500);
+    const timer3 = setTimeout(() => setCurrentStep(3), 8500);
+    const timer4 = setTimeout(() => setCurrentStep(4), 11500);
+    const timer5 = setTimeout(() => setCurrentStep(5), 14500);
 
     return () => {
       clearTimeout(timer1);
@@ -70,11 +62,10 @@ export default function LoadingScreen() {
       clearTimeout(timer3);
       clearTimeout(timer4);
       clearTimeout(timer5);
-      clearTimeout(timer6);
     };
   }, []);
 
-  const progressPercent = Math.min(Math.round(((currentStep + 1) / 7) * 100), 100);
+  const progressPercent = Math.min(Math.round(((currentStep + 1) / steps.length) * 100), 100);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-slate-950/95 backdrop-blur-2xl px-4 text-white overflow-y-auto py-8">
@@ -100,11 +91,11 @@ export default function LoadingScreen() {
             <Sparkles className="w-4 h-4 text-brand-400 animate-spin" />
             <span className="tracking-wide">ORCHESTRATING PIPELINE ({progressPercent}%)</span>
           </div>
-          <h2 className="font-display font-extrabold text-3xl tracking-tight text-white drop-shadow-sm">
+          <h2 className="font-display font-extrabold text-2xl sm:text-3xl tracking-tight text-white drop-shadow-sm">
             Evaluating Venture Viability
           </h2>
           <p className="text-xs sm:text-sm text-slate-400 max-w-md mx-auto leading-relaxed font-medium">
-            7 specialized AI agents analyzing real-time web data, market sizing, competitive landscapes, and financial feasibility.
+            Multi-agent swarm evaluating web data, market sizing, competitor moats, SWOT, 6-pillar risks, MoSCoW MVP, and GTM strategy.
           </p>
 
           {/* Master Progress Bar */}
@@ -117,7 +108,7 @@ export default function LoadingScreen() {
         </div>
 
         {/* Steps List */}
-        <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-5 text-left space-y-3 shadow-2xl max-h-[420px] overflow-y-auto custom-scrollbar backdrop-blur-xl">
+        <div className="bg-slate-900/90 border border-slate-800/90 rounded-3xl p-4 sm:p-5 text-left space-y-2.5 shadow-2xl max-h-[420px] overflow-y-auto custom-scrollbar backdrop-blur-xl">
           {steps.map((step, idx) => {
             const isCompleted = idx < currentStep;
             const isActive = idx === currentStep;
@@ -126,7 +117,7 @@ export default function LoadingScreen() {
             return (
               <div
                 key={idx}
-                className={`p-3.5 rounded-2xl border transition-all duration-300 ${
+                className={`p-3 rounded-2xl border transition-all duration-300 ${
                   isActive 
                     ? "bg-slate-800/90 border-brand-500/60 shadow-lg shadow-brand-500/10 scale-[1.01]" 
                     : isCompleted 
