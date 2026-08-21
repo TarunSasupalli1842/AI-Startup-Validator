@@ -5,13 +5,26 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-# Primary and fallback model endpoints supported by Gemini API
+# Primary and fallback model endpoints supported by Gemini API (fastest and most reliable first)
 GEMINI_MODELS = [
-    "gemini-3.6-flash",
-    "gemini-3.1-pro-preview",
-    "gemini-2.5-flash",
-    "gemini-2.5-pro"
+    "gemini-flash-lite-latest",
+    "gemini-3.5-flash",
+    "gemini-3.5-flash-lite",
+    "gemini-3.1-flash-lite",
+    "gemini-2.5-flash-lite"
 ]
+
+def clean_json_text(text: str) -> str:
+    """Strips Markdown code block fences (e.g. ```json ... ```) from LLM text."""
+    cleaned = text.strip()
+    if cleaned.startswith("```"):
+        lines = cleaned.splitlines()
+        if lines and lines[0].startswith("```"):
+            lines = lines[1:]
+        if lines and lines[-1].strip() == "```":
+            lines = lines[:-1]
+        cleaned = "\n".join(lines).strip()
+    return cleaned
 
 async def call_gemini(prompt: str, expect_json: bool = False, system_instruction: str = "") -> str:
     """
@@ -44,15 +57,19 @@ async def call_gemini(prompt: str, expect_json: bool = False, system_instruction
         payload["generationConfig"]["responseMimeType"] = "application/json"
         
     last_error = None
+    timeout_config = httpx.Timeout(12.0, connect=4.0)
+
     for model_name in GEMINI_MODELS:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={settings.GEMINI_API_KEY}"
         try:
-            async with httpx.AsyncClient(timeout=25.0) as client:
+            async with httpx.AsyncClient(timeout=timeout_config) as client:
                 response = await client.post(url, json=payload, headers={"Content-Type": "application/json"})
                 if response.status_code == 200:
                     data = response.json()
                     try:
                         text_content = data["candidates"][0]["content"]["parts"][0]["text"]
+                        if expect_json:
+                            text_content = clean_json_text(text_content)
                         return text_content
                     except (KeyError, IndexError) as parse_err:
                         logger.error(f"Failed to parse Gemini API response JSON structure: {parse_err}. Raw: {data}")

@@ -109,6 +109,8 @@ export default function Home() {
       const backendDetail = err.response?.data?.detail;
       if (backendDetail) {
         setError(backendDetail);
+      } else if (err.code === 'ECONNABORTED' || err.message?.includes('timeout')) {
+        setError("Validation request timed out. The multi-agent pipeline is processing deep web intelligence. Please try submitting again.");
       } else {
         setError("Failed to validate startup idea. Make sure the backend server is running on http://localhost:8000.");
       }

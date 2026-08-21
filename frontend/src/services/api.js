@@ -8,7 +8,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 60000, // Ample timeout for full multi-agent pipeline executions
+  timeout: 120000, // 2-minute timeout for multi-agent pipeline executions
 });
 
 /**

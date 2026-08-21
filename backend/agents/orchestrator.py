@@ -55,31 +55,30 @@ class ValidationOrchestrator:
         try:
             logger.info("Initializing multi-agent startup validation pipeline...")
             
-            # Step 1: Extraction Agent
+            # Wave 1: Extraction Agent
             logger.info("Stage 1/11: Running Extraction Agent...")
             extracted_idea = await self.extraction_agent.run(input_dict)
             
-            # Step 2: Market Research Agent
-            logger.info("Stage 2/11: Running Market Research Agent...")
-            market_research = await self.market_research_agent.run(extracted_idea)
+            # Wave 2: Run Market Research, Customer Segmentation, and Competitor Analysis concurrently
+            logger.info("Stages 2, 4, 5/11: Running Market Research, Customer Segmentation, and Competitor Analysis in parallel...")
+            research_task = self.market_research_agent.run(extracted_idea)
+            segmentation_task = self.customer_segmentation_agent.run(extracted_idea)
+            competitor_task = self.competitor_agent.run(extracted_idea)
+
+            market_research, customer_segmentation, competitor_analysis = await asyncio.gather(
+                research_task, segmentation_task, competitor_task
+            )
             
-            # Step 3: Market Opportunity Agent
-            logger.info("Stage 3/11: Running Market Opportunity Agent...")
-            market_opportunity = await self.market_opportunity_agent.run(extracted_idea, market_research)
+            # Wave 3: Run Market Opportunity and Comparison Matrix concurrently
+            logger.info("Stages 3, 6/11: Running Market Opportunity and Comparison Matrix in parallel...")
+            opportunity_task = self.market_opportunity_agent.run(extracted_idea, market_research)
+            comparison_task = self.comparison_agent.run(extracted_idea, competitor_analysis)
+
+            market_opportunity, comparison_matrix = await asyncio.gather(
+                opportunity_task, comparison_task
+            )
             
-            # Step 4: Customer Segmentation Agent
-            logger.info("Stage 4/11: Running Customer Segmentation Agent...")
-            customer_segmentation = await self.customer_segmentation_agent.run(extracted_idea)
-            
-            # Step 5: Competitor Analysis Agent
-            logger.info("Stage 5/11: Running Competitor Analysis Agent...")
-            competitor_analysis = await self.competitor_agent.run(extracted_idea)
-            
-            # Step 6: Comparison Agent
-            logger.info("Stage 6/11: Running Comparison Matrix Agent...")
-            comparison_matrix = await self.comparison_agent.run(extracted_idea, competitor_analysis)
-            
-            # Concurrent Execution of Milestone 3 Specialized Strategic Agents (Stages 7 - 10)
+            # Wave 4: Specialized Strategic Agents (Stages 7 - 10) in parallel
             logger.info("Stages 7-10/11: Running SWOT, Risk, MVP (MoSCoW), and GTM Agents in parallel...")
             swot_task = self.swot_agent.run(extracted_idea, market_research, market_opportunity, competitor_analysis)
             risk_task = self.risk_agent.run(extracted_idea, market_research, market_opportunity, competitor_analysis, customer_segmentation)
@@ -90,7 +89,7 @@ class ValidationOrchestrator:
                 swot_task, risk_task, mvp_task, gtm_task
             )
             
-            # Step 11: Validation Synthesis Agent
+            # Wave 5: Validation Synthesis Agent (Stage 11)
             logger.info("Stage 11/11: Running Validation Synthesis Agent...")
             final_report = await self.validation_agent.run(
                 idea=extracted_idea,
