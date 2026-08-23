@@ -6,62 +6,44 @@ export default function LoadingScreen() {
 
   const steps = [
     {
-      title: "01. Extraction Agent",
-      desc: "Deconstructing startup statement, isolating core problem-solution vectors, and defining target profile.",
-      loadingMsg: "⚙️ Isolating core problem-solution vectors...",
-      icon: Cpu,
-      color: "text-violet-400 bg-violet-500/10 border-violet-500/30 shadow-violet-500/10"
-    },
-    {
-      title: "02. Market Research & TAM Agent",
-      desc: "Scanning live web search for macro industry trends, TAM/SAM/SOM sizing, and customer demand metrics.",
-      loadingMsg: "🌐 Querying live web search intelligence & TAM market data...",
+      title: "01. Market Sizing & Demand Agent",
+      desc: "Scanning live web data for industry trends, TAM/SAM/SOM sizing in ₹, and customer demand metrics.",
+      loadingMsg: "🌐 Querying live web search intelligence & TAM market sizing in ₹...",
       icon: Globe,
       color: "text-cyan-400 bg-cyan-500/10 border-cyan-500/30 shadow-cyan-500/10"
     },
     {
-      title: "03. Competitor Analysis Agent",
+      title: "02. Competitor & Moat Agent",
       desc: "Cataloging market alternatives, calculating feature comparison matrix, and mapping defensibility moats.",
       loadingMsg: "⚔️ Cataloging competitive moats & alternative solutions...",
       icon: Shield,
       color: "text-rose-400 bg-rose-500/10 border-rose-500/30 shadow-rose-500/10"
     },
     {
-      title: "04. SWOT & Multi-Risk Agent",
+      title: "03. SWOT & Multi-Risk Agent",
       desc: "Evaluating 6-pillar risks (Market, Competitor, Financial, Tech, Ops, Customer) and SWOT reasoning.",
       loadingMsg: "⚠️ Analyzing 6 risk pillars and calculating mitigations...",
       icon: AlertTriangle,
       color: "text-amber-400 bg-amber-500/10 border-amber-500/30 shadow-amber-500/10"
     },
     {
-      title: "05. MoSCoW MVP Roadmap Agent",
-      desc: "Categorizing MVP features into Must-Have, Should-Have, Could-Have, and Won't-Have buckets.",
-      loadingMsg: "📦 Structuring MoSCoW MVP features & build timeline...",
-      icon: Layers,
-      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-emerald-500/10"
-    },
-    {
-      title: "06. Go-To-Market & Synthesis Agent",
-      desc: "Synthesizing GTM positioning, acquisition channels, launch roadmap, and overall viability scores.",
-      loadingMsg: "🚀 Finalizing GTM playbook & overall venture score...",
+      title: "04. MVP Roadmap & GTM Agent",
+      desc: "Synthesizing MoSCoW MVP roadmap, launch strategy, and pricing structure in Indian Rupees (₹).",
+      loadingMsg: "🚀 Finalizing MoSCoW MVP features & GTM launch playbook...",
       icon: Rocket,
-      color: "text-teal-400 bg-teal-500/10 border-teal-500/30 shadow-teal-500/10"
+      color: "text-emerald-400 bg-emerald-500/10 border-emerald-500/30 shadow-emerald-500/10"
     }
   ];
 
   useEffect(() => {
-    const timer1 = setTimeout(() => setCurrentStep(1), 2500);
-    const timer2 = setTimeout(() => setCurrentStep(2), 5500);
-    const timer3 = setTimeout(() => setCurrentStep(3), 8500);
-    const timer4 = setTimeout(() => setCurrentStep(4), 11500);
-    const timer5 = setTimeout(() => setCurrentStep(5), 14500);
+    const timer1 = setTimeout(() => setCurrentStep(1), 3500);
+    const timer2 = setTimeout(() => setCurrentStep(2), 7500);
+    const timer3 = setTimeout(() => setCurrentStep(3), 11500);
 
     return () => {
       clearTimeout(timer1);
       clearTimeout(timer2);
       clearTimeout(timer3);
-      clearTimeout(timer4);
-      clearTimeout(timer5);
     };
   }, []);
 

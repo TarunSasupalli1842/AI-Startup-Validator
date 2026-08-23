@@ -6,10 +6,42 @@ import {
   TrendingUp, Users, Table, Award, Zap, Layers, Sparkles,
   Printer, Copy, Check, Share2, Shield, ArrowUpRight,
   LayoutDashboard, ChevronRight, ChevronLeft, Star, CheckSquare, Square, BarChart3, Globe,
-  MessageSquare, Bot, Rocket, X, Clock, HelpCircle, CheckCircle2
+  MessageSquare, Bot, Rocket, X, Clock, HelpCircle, CheckCircle2, IndianRupee
 } from 'lucide-react';
 import ScoreGauge from '../components/ScoreGauge';
 import StartupAdvisor from '../components/StartupAdvisor';
+
+// Utility helper to format monetary amounts in Indian Rupees (INR / ₹)
+const formatInr = (val, fallback = '') => {
+  if (!val) return fallback;
+  if (typeof val !== 'string') return String(val);
+  if (val.includes('₹')) return val;
+
+  let formatted = val
+    .replace(/\$([0-9,.]+)\s*Billion/gi, (_, n) => {
+      const num = parseFloat(n.replace(/,/g, ''));
+      return `₹${Math.round(num * 8300).toLocaleString('en-IN')} Cr`;
+    })
+    .replace(/\$([0-9,.]+)\s*B\b/gi, (_, n) => {
+      const num = parseFloat(n.replace(/,/g, ''));
+      return `₹${Math.round(num * 8300).toLocaleString('en-IN')} Cr`;
+    })
+    .replace(/\$([0-9,.]+)\s*Million/gi, (_, n) => {
+      const num = parseFloat(n.replace(/,/g, ''));
+      return `₹${Math.round(num * 8.3).toLocaleString('en-IN')} Cr`;
+    })
+    .replace(/\$([0-9,.]+)\s*M\b/gi, (_, n) => {
+      const num = parseFloat(n.replace(/,/g, ''));
+      return `₹${Math.round(num * 8.3).toLocaleString('en-IN')} Cr`;
+    })
+    .replace(/\$([0-9,.]+)/g, (_, n) => {
+      const num = parseFloat(n.replace(/,/g, ''));
+      return `₹${Math.round(num * 83).toLocaleString('en-IN')}`;
+    })
+    .replace(/\$/g, '₹');
+
+  return formatted;
+};
 
 export default function ValidationReport() {
   const location = useLocation();
@@ -133,7 +165,7 @@ Description: ${report.summary?.high_level_description}`;
       shortLabel: 'Market',
       icon: TrendingUp,
       emoji: '📈',
-      badge: market_opportunity?.tam ? `TAM: ${market_opportunity.tam.split(' ')[0]}` : 'Market Sizing',
+      badge: market_opportunity?.tam ? `TAM: ${formatInr(market_opportunity.tam).split(' ')[0]}` : 'Market Sizing',
       badgeColor: 'bg-indigo-500/15 text-indigo-700 dark:text-indigo-300 border-indigo-500/30',
       description: 'TAM/SAM/SOM & growth drivers' 
     },
@@ -290,7 +322,7 @@ Description: ${report.summary?.high_level_description}`;
               <div className="flex items-center justify-center md:justify-start gap-2">
                 <Sparkles className="w-4 h-4 text-brand-500 animate-pulse" />
                 <span className="text-xs font-black uppercase tracking-wider text-brand-600 dark:text-brand-400">
-                  Validation Intelligence Dossier
+                  Validation Intelligence Results
                 </span>
               </div>
               <h1 className="font-display font-black text-2xl sm:text-3xl lg:text-4xl tracking-tight text-slate-900 dark:text-white">
@@ -325,7 +357,7 @@ Description: ${report.summary?.high_level_description}`;
               <div className="flex items-center gap-2">
                 <span className="flex h-2.5 w-2.5 rounded-full bg-emerald-500 animate-pulse" />
                 <span className="text-xs font-black uppercase tracking-wider text-slate-900 dark:text-white">
-                  Multi-Agent Validation Dossier
+                  Multi-Agent Validation Results
                 </span>
                 <span className="text-[10px] font-extrabold px-2.5 py-0.5 rounded-full bg-brand-500/10 text-brand-700 dark:text-brand-300 border border-brand-500/30">
                   {tabs.length} Strategic Modules
@@ -625,7 +657,7 @@ Description: ${report.summary?.high_level_description}`;
                     Total Addressable Market (TAM)
                   </span>
                   <div className="text-3xl font-black text-indigo-950 dark:text-indigo-200">
-                    {market_opportunity?.tam}
+                    {formatInr(market_opportunity?.tam, '₹2,50,000 Cr')}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Global macro sector market size.</p>
                 </div>
@@ -635,7 +667,7 @@ Description: ${report.summary?.high_level_description}`;
                     Serviceable Addressable Market (SAM)
                   </span>
                   <div className="text-3xl font-black text-brand-950 dark:text-brand-200">
-                    {market_opportunity?.sam}
+                    {formatInr(market_opportunity?.sam, '₹35,000 Cr')}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Target customer segment footprint.</p>
                 </div>
@@ -645,7 +677,7 @@ Description: ${report.summary?.high_level_description}`;
                     Serviceable Obtainable Market (SOM)
                   </span>
                   <div className="text-3xl font-black text-emerald-950 dark:text-emerald-200">
-                    {market_opportunity?.som}
+                    {formatInr(market_opportunity?.som, '₹1,500 Cr')}
                   </div>
                   <p className="text-xs text-slate-500 dark:text-slate-400 font-medium">Realistic 3-year obtainable market target.</p>
                 </div>
@@ -655,7 +687,7 @@ Description: ${report.summary?.high_level_description}`;
               <div className="space-y-3 max-w-3xl mx-auto pt-4">
                 <div className="p-4 rounded-2xl bg-indigo-500/10 border border-indigo-500/30">
                   <div className="flex items-center justify-between text-xs font-black text-indigo-700 dark:text-indigo-300">
-                    <span>TAM: {market_opportunity?.tam}</span>
+                    <span>TAM: {formatInr(market_opportunity?.tam, '₹2,50,000 Cr')}</span>
                     <span>100% Macro Market</span>
                   </div>
                   <div className="w-full bg-indigo-200/50 dark:bg-indigo-950/60 h-2.5 rounded-full overflow-hidden mt-1.5">
@@ -665,7 +697,7 @@ Description: ${report.summary?.high_level_description}`;
 
                 <div className="p-4 rounded-2xl bg-brand-500/10 border border-brand-500/30 max-w-[85%] mx-auto">
                   <div className="flex items-center justify-between text-xs font-black text-brand-700 dark:text-brand-300">
-                    <span>SAM: {market_opportunity?.sam}</span>
+                    <span>SAM: {formatInr(market_opportunity?.sam, '₹35,000 Cr')}</span>
                     <span>Addressable Segment</span>
                   </div>
                   <div className="w-full bg-brand-200/50 dark:bg-brand-950/60 h-2.5 rounded-full overflow-hidden mt-1.5">
@@ -675,7 +707,7 @@ Description: ${report.summary?.high_level_description}`;
 
                 <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 max-w-[70%] mx-auto">
                   <div className="flex items-center justify-between text-xs font-black text-emerald-700 dark:text-emerald-300">
-                    <span>SOM: {market_opportunity?.som}</span>
+                    <span>SOM: {formatInr(market_opportunity?.som, '₹1,500 Cr')}</span>
                     <span>3-Yr Target</span>
                   </div>
                   <div className="w-full bg-emerald-200/50 dark:bg-emerald-950/60 h-2.5 rounded-full overflow-hidden mt-1.5">
@@ -688,11 +720,11 @@ Description: ${report.summary?.high_level_description}`;
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t border-slate-200/60 dark:border-slate-800/60">
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/60 dark:border-slate-800/60 space-y-1">
                   <span className="text-[10px] uppercase font-black text-slate-400">Estimated CAC</span>
-                  <p className="text-lg font-black text-slate-900 dark:text-white">{market_opportunity?.estimated_cac || '$45 - $80'}</p>
+                  <p className="text-lg font-black text-slate-900 dark:text-white">{formatInr(market_opportunity?.estimated_cac, '₹3,500 - ₹6,500')}</p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/60 dark:border-slate-800/60 space-y-1">
                   <span className="text-[10px] uppercase font-black text-slate-400">Estimated LTV</span>
-                  <p className="text-lg font-black text-slate-900 dark:text-white">{market_opportunity?.estimated_ltv || '$450 - $1,200'}</p>
+                  <p className="text-lg font-black text-slate-900 dark:text-white">{formatInr(market_opportunity?.estimated_ltv, '₹35,000 - ₹95,000')}</p>
                 </div>
                 <div className="p-4 rounded-2xl bg-slate-50 dark:bg-slate-950/50 border border-slate-200/60 dark:border-slate-800/60 space-y-1">
                   <span className="text-[10px] uppercase font-black text-slate-400">CAGR Growth Rate</span>
@@ -748,7 +780,7 @@ Description: ${report.summary?.high_level_description}`;
                         ⭐ Primary Segment
                       </span>
                       <span className="text-[10px] font-black px-2 py-0.5 rounded bg-brand-500/20 text-brand-700 dark:text-brand-300">
-                        {customer_segmentation.primary_segment.willingness_to_pay}
+                        {formatInr(customer_segmentation.primary_segment.willingness_to_pay)}
                       </span>
                     </div>
                     <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
@@ -773,7 +805,7 @@ Description: ${report.summary?.high_level_description}`;
                           Secondary Segment #{sIdx + 1}
                         </span>
                         <span className="text-[10px] font-black px-2 py-0.5 rounded bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">
-                          {sec.willingness_to_pay}
+                          {formatInr(sec.willingness_to_pay)}
                         </span>
                       </div>
                       <h4 className="font-extrabold text-slate-900 dark:text-white text-sm">
@@ -1374,17 +1406,17 @@ Description: ${report.summary?.high_level_description}`;
                 <div className="p-6 rounded-3xl bg-white dark:bg-slate-950/60 border border-slate-200/80 dark:border-slate-800 space-y-4">
                   <div className="flex items-center justify-between border-b border-slate-200/60 dark:border-slate-800 pb-3">
                     <h4 className="font-display font-extrabold text-sm text-slate-900 dark:text-white flex items-center gap-2">
-                      <DollarSign className="w-4 h-4 text-emerald-500" />
+                      <IndianRupee className="w-4 h-4 text-emerald-500" />
                       Recommended Pricing Structure
                     </h4>
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 font-medium">
-                    {gtm_strategy?.pricing_strategy}
+                    {formatInr(gtm_strategy?.pricing_strategy)}
                   </p>
                   <div className="space-y-2">
                     {(gtm_strategy?.pricing_tiers || []).map((tier, tIdx) => (
                       <div key={tIdx} className="p-3 rounded-2xl bg-emerald-50/50 dark:bg-emerald-950/20 border border-emerald-500/20 text-xs font-semibold text-slate-800 dark:text-slate-200">
-                        {tier}
+                        {formatInr(tier)}
                       </div>
                     ))}
                   </div>

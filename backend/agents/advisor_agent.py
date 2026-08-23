@@ -85,10 +85,10 @@ class AdvisorAgent:
         ])
 
         prompt = f"""
-        You are an elite, empathetic, and highly analytical AI Startup Advisor & Venture Partner.
-        Answer the founder's question directly, referencing their specific validation metrics, SWOT, risks, MVP features, and GTM strategy.
+        You are an elite, high-signal AI Startup Advisor & Venture Partner.
+        Answer the founder's question directly using their validation dossier as context.
 
-        [VALIDATION KNOWLEDGE BASE]
+        [VALIDATION DOSSIER]
         {context_text}
 
         [RECENT CONVERSATION HISTORY]
@@ -97,24 +97,26 @@ class AdvisorAgent:
         [FOUNDER QUESTION]
         "{user_msg}"
 
-        Requirements:
-        - Provide an actionable, direct, and well-structured answer (2-4 paragraphs or formatted bullet points).
-        - Ground your advice specifically in their startup's domain ({idea.get("industry", "their industry")}), target audience ({idea.get("target_audience", "their customers")}), and validation metrics.
-        - Be encouraging yet pragmatically realistic about risks and execution pitfalls.
-        - Generate 3 smart, highly relevant follow-up questions the founder should consider asking next.
+        CRITICAL CONCISENESS RULES:
+        1. Keep your reply VERY CONCISE and punchy (strictly under 60-80 words total).
+        2. NO fluff, filler words, lengthy greetings, or disclaimers.
+        3. Start with 1 direct, high-impact sentence.
+        4. Follow with 2 to 3 short bullet points with key takeaways bolded.
+        5. Tailor specifically to their startup ({idea.get("startup_name", "Startup")}) and customers ({idea.get("target_audience", "target audience")}).
+        6. Provide 3 short suggested follow-up questions.
 
         Return strictly a JSON object matching this schema:
         {{
-            "reply": "Comprehensive, markdown-formatted response with clear advice and bullet points.",
+            "reply": "Concise, punchy markdown response (1 short lead sentence + 2-3 short bullets, under 80 words).",
             "suggested_followups": [
-                "Suggested question 1",
-                "Suggested question 2",
-                "Suggested question 3"
+                "Short follow-up 1",
+                "Short follow-up 2",
+                "Short follow-up 3"
             ]
         }}
         """
 
-        system_instruction = "You are a seasoned startup advisor, Y Combinator-style mentor, and venture partner. Offer precise, battle-tested, and constructive guidance based strictly on the startup's validation dossier."
+        system_instruction = "You are a concise, high-signal startup advisor. Provide short, punchy, direct advice (under 80 words) using 2-3 clean bullet points. Zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)
@@ -134,7 +136,7 @@ class AdvisorAgent:
             return self._fallback_chat(user_msg, report_data)
 
     def _fallback_chat(self, user_msg: str, report: Dict[str, Any]) -> AdvisorChatResponse:
-        """Rule-based contextual response engine when Gemini is unavailable."""
+        """Rule-based concise contextual response engine when Gemini is unavailable."""
         msg_lower = user_msg.lower()
         idea = report.get("extracted_idea", {})
         name = idea.get("startup_name", "your startup")
@@ -153,75 +155,55 @@ class AdvisorAgent:
         if "build" in msg_lower or "first" in msg_lower or "mvp" in msg_lower:
             must_haves = mvp.get("must_have", [])
             if must_haves:
-                feature_items = [f"- **{f.get('feature_name', 'Feature')}**: {f.get('description', '')}" for f in must_haves[:3]]
+                feature_items = [f"- **{f.get('feature_name', 'Feature')}**: {f.get('description', '')}" for f in must_haves[:2]]
                 features_str = "\n".join(feature_items)
             else:
-                features_str = f"- **Core Automation Engine**: Build the simplest prototype solving {prob}.\n- **1-Click Self-Service UI**: Provide an intuitive interface allowing {aud} to test and receive results immediately."
+                features_str = f"- **Core Workflow**: The simplest tool solving {prob}.\n- **Self-Service UI**: Frictionless testing for {aud}."
 
             timeline = mvp.get('target_timeline_weeks', '4-6 Weeks')
-            reply = f"""### 🚀 What You Should Build First for **{name}**
-
-To validate customer demand without wasting engineering cycles, focus exclusively on the **Must-Have** core workflow:
+            reply = f"""**Focus strictly on the Must-Have workflow ({timeline} build):**
 
 {features_str}
-
-**Key Strategic Advice:**
-1. **Target Timeline:** Commit to a strict **{timeline} sprint**. Anything longer increases risk of building unvalidated features.
-2. **Defensibility Focus:** Ensure your MVP delivers immediate value within 60 seconds of onboarding.
-3. **Do Things That Don't Scale:** Manually verify outputs for your first 15 beta users to refine the algorithm before automating everything."""
+- **Rule**: Deliver value in <60 seconds; test with 10 beta users before writing more code."""
 
             followups = [
                 "How do I keep MVP development under 4 weeks?",
                 "How can I get my first 100 users?",
-                "What features should I deliberately NOT build yet?"
+                "What features should I skip?"
             ]
 
         elif "risk" in msg_lower or "risky" in msg_lower or "threat" in msg_lower:
             risk_list = risks.get("risks", [])
             if risk_list:
-                risk_items = [f"- **{r.get('category', 'Risk')}**: {r.get('risk', '')} *(Mitigation: {r.get('mitigation', '')})*" for r in risk_list[:3]]
+                risk_items = [f"- **{r.get('category', 'Risk')}**: {r.get('risk', '')}" for r in risk_list[:2]]
                 risk_str = "\n".join(risk_items)
             else:
-                risk_str = f"- **Customer Adoption Risk**: {aud} may exhibit friction moving away from existing legacy processes.\n- **Competitor Risk**: Incumbents in {ind} may replicate features if your workflow lacks sticky data lock-in."
+                risk_str = f"- **Adoption**: Friction moving {aud} off legacy tools.\n- **Moat**: Need sticky data lock-in against rivals."
 
-            cac = opp.get('estimated_cac', '$50')
-            ltv = opp.get('estimated_ltv', '$500')
             risk_level = risks.get('overall_risk_level', 'Moderate')
-
-            reply = f"""### ⚠️ Risk Breakdown for **{name}** (Overall Risk: **{risk_level}**)
-
-Here are the primary risk vectors identified in your validation analysis:
+            reply = f"""**Top risks for {name} ({risk_level} Risk Level):**
 
 {risk_str}
-
-**Top Recommended Mitigations:**
-- **Pre-Sell to Design Partners:** Secure 5-10 letters of intent or beta commitments before writing extensive code.
-- **Unit Economics Vigilance:** Keep customer acquisition cost below your projected LTV target ({cac} vs {ltv})."""
+- **Key Mitigation**: Pre-sell 5–10 letters of intent or beta commitments before heavy coding."""
 
             followups = [
-                "How can I protect my product against competitor copycats?",
+                "How can I build a stronger moat?",
                 "What should I build first?",
-                "How do I validate customer willingness to pay?"
+                "How do I validate willingness to pay?"
             ]
 
         elif "user" in msg_lower or "100" in msg_lower or "acquire" in msg_lower or "marketing" in msg_lower or "growth" in msg_lower:
             channels = gtm.get("acquisition_channels", [])
             if channels:
-                channel_items = [f"- **{c.get('channel_name', 'Channel')}**: {c.get('description', '')} *(CAC: {c.get('expected_cac', 'Low')})*" for c in channels[:3]]
+                channel_items = [f"- **{c.get('channel_name', 'Channel')}**: {c.get('description', '')}" for c in channels[:2]]
                 channels_str = "\n".join(channel_items)
             else:
-                channels_str = f"1. **Direct Founder Outreach:** Personally message 50 decision makers in {aud} offering exclusive early access.\n2. **Community Seeding:** Share insightful teardowns and case studies in niche LinkedIn and Reddit groups.\n3. **Freemium Interactive Preview:** Allow visitors to experience the core value proposition with zero signup friction."
+                channels_str = f"- **Founder Outreach**: Message 20 target users in {aud} daily.\n- **Community Seeding**: Share teardowns in niche communities."
 
-            reply = f"""### 🎯 How to Acquire Your First 100 Users for **{name}**
-
-For early traction in **{ind}**, broad paid advertising is often too expensive. Instead, deploy a high-touch, product-led acquisition funnel:
+            reply = f"""**Fastest path to your first 100 users for {name}:**
 
 {channels_str}
-
-**Founder Action Checklist:**
-1. Launch a lean waitlist landing page featuring a 45-second demo video.
-2. Direct message 15 target users daily with personalized value pitches.
-3. Offer initial users white-glove onboarding and free 3-month upgrades in exchange for case studies and referrals."""
+- **Action**: Offer white-glove onboarding to early users in exchange for case studies and referrals."""
 
             followups = [
                 "What is my ideal pricing model?",
@@ -232,44 +214,35 @@ For early traction in **{ind}**, broad paid advertising is often too expensive. 
         elif "price" in msg_lower or "pricing" in msg_lower or "monetiz" in msg_lower or "charge" in msg_lower:
             tiers = gtm.get("pricing_tiers", [])
             if tiers:
-                tiers_str = "\n".join([f"- **{t}**" for t in tiers])
+                tiers_str = "\n".join([f"- **{t}**" for t in tiers[:2]])
             else:
-                tiers_str = "- **Free Starter Tier**: Basic trial limits to trigger viral word-of-mouth.\n- **Pro Tier ($39/mo)**: Unlimited core workflow executions.\n- **Team Tier ($149/mo)**: Collaborative features and priority support."
+                tiers_str = "- **Pro Tier**: Core workflow subscription.\n- **Team Tier**: Multi-user collaboration & priority features."
 
-            pricing_strategy = gtm.get('pricing_strategy', f'Value-aligned subscription model tailored for {aud}.')
+            pricing_strategy = gtm.get('pricing_strategy', f'Value-aligned subscription for {aud}.')
 
-            reply = f"""### 💳 Monetization & Pricing Strategy for **{name}**
+            reply = f"""**Pricing & Monetization for {name}:**
 
-**Pricing Philosophy:** {pricing_strategy}
-
-**Recommended Tier Architecture:**
 {tiers_str}
-
-**Validation Strategy:** Don't wait until full release to charge. Ask beta testers for a pre-order discount or upfront annual subscription to prove genuine willingness to pay."""
+- **Strategy**: {pricing_strategy}
+- **Action**: Charge beta users a discounted upfront annual plan to confirm real willingness to pay."""
 
             followups = [
-                "How do I test if customers will pay before building?",
+                "How do I test pricing before building?",
                 "How can I get my first 100 users?",
                 "What should I build first?"
             ]
 
         else:
-            verdict = summary.get('feasibility_verdict', 'Strong Concept')
-            tam = opp.get('tam', f'High-growth segment in {ind}')
-            moat = report.get('competitor_analysis', {}).get('unique_moat', f'Purpose-built workflows tailored specifically for {aud}.')
+            verdict = summary.get('feasibility_verdict', 'Viable Concept')
+            moat = report.get('competitor_analysis', {}).get('unique_moat', f'Workflows tailored for {aud}.')
             launch_phases = gtm.get('launch_strategy', [])
-            first_phase = launch_phases[0].get('phase_name', 'Pre-launch validation & MVP construction') if launch_phases else 'Pre-launch validation & MVP construction'
+            first_phase = launch_phases[0].get('phase_name', 'Pre-launch validation') if launch_phases else 'Pre-launch validation'
 
-            reply = f"""### 💡 Venture Analysis Insight for **{name}**
+            reply = f"""**Key Insight for {name}:**
 
-Regarding your question about *"{user_msg}"*:
-
-- **Current Viability Score:** **{overall_score}%** ({verdict}).
-- **Core Market Opportunity:** {tam}.
-- **Primary Moat:** {moat}.
-
-**Recommended Next Step:**
-Focus on executing the initial phase of your Go-To-Market roadmap: *{first_phase}*."""
+- **Viability**: **{overall_score}%** ({verdict}).
+- **Core Moat**: {moat}
+- **Next Step**: Execute *{first_phase}* to validate customer demand quickly."""
 
             followups = DEFAULT_SUGGESTIONS[:3]
 

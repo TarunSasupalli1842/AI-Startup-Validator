@@ -26,58 +26,63 @@ class ComparisonAgent:
         ])
 
         prompt = f"""
-        Build head-to-head Comparison Matrix for '{idea.startup_name}':
+        Build a head-to-head Comparison Matrix using simple, clear words for '{idea.startup_name}':
         Core Solution: {idea.core_solution}
         Revenue Model: {idea.revenue_model}
         Competitor Details:
         {competitor_details}
         
-        Keep matrix row cell entries short and punchy (5-8 words max per cell). Keep positioning_summary to 1 crisp sentence.
-        Return strictly a JSON object matching this schema:
+        RULES:
+        - Use simple, everyday words.
+        - Matrix cells: Strictly 2 to 5 simple words per cell.
+        - positioning_summary: 1 short simple sentence (max 15 words).
+        - No jargon or long matter.
+
+        Return strictly as a JSON object:
         {{
             "competitor_names": ["{comp_1_name}", "{comp_2_name}"],
             "comparison_matrix": [
                 {{
-                    "dimension": "Pricing & Model",
-                    "our_startup": "Usage-based transparent pricing",
-                    "primary_competitor": "Expensive annual contract",
-                    "secondary_competitor": "Fixed seat pricing",
-                    "our_advantage": "Flexible pay-as-you-grow model"
+                    "dimension": "Pricing",
+                    "our_startup": "Affordable monthly plan",
+                    "primary_competitor": "Expensive contracts",
+                    "secondary_competitor": "High per-user fees",
+                    "our_advantage": "Lower entry cost"
                 }},
                 {{
-                    "dimension": "Automation Depth",
-                    "our_startup": "Native automated workflows",
-                    "primary_competitor": "Manual config & triggers",
-                    "secondary_competitor": "Basic prompt wrapper",
-                    "our_advantage": "Full end-to-end task automation"
+                    "dimension": "Ease of Use",
+                    "our_startup": "Instant 1-click setup",
+                    "primary_competitor": "Weeks of onboarding",
+                    "secondary_competitor": "Manual setup required",
+                    "our_advantage": "Zero learning curve"
                 }},
                 {{
-                    "dimension": "Time-to-Value",
-                    "our_startup": "Instant execution setup",
-                    "primary_competitor": "Multi-week onboarding",
-                    "secondary_competitor": "Manual template creation",
-                    "our_advantage": "Zero setup friction"
+                    "dimension": "Speed & Automation",
+                    "our_startup": "Automated AI workflows",
+                    "primary_competitor": "Manual data entry",
+                    "secondary_competitor": "Basic templates only",
+                    "our_advantage": "Saves 10+ hours weekly"
                 }},
                 {{
-                    "dimension": "User Target Alignment",
-                    "our_startup": "Built specifically for {idea.target_audience}",
+                    "dimension": "Target Fit",
+                    "our_startup": "Tailored for {idea.target_audience}",
                     "primary_competitor": "Generic enterprise tool",
-                    "secondary_competitor": "Limited customization",
-                    "our_advantage": "Deep domain specialization"
+                    "secondary_competitor": "Limited flexibility",
+                    "our_advantage": "Built for their exact needs"
                 }},
                 {{
-                    "dimension": "Defensible Moat",
-                    "our_startup": "Vertical integration & speed",
-                    "primary_competitor": "Legacy code complexity",
-                    "secondary_competitor": "Thin basic feature wrapper",
-                    "our_advantage": "Proprietary workflow speed"
+                    "dimension": "Customer Support",
+                    "our_startup": "Fast 24/7 self-service",
+                    "primary_competitor": "Slow email tickets",
+                    "secondary_competitor": "Community forum only",
+                    "our_advantage": "Instant AI guidance"
                 }}
             ],
-            "positioning_summary": "1 concise sentence on market positioning against alternatives."
+            "positioning_summary": "1 short simple sentence on competitive positioning."
         }}
         """
 
-        system_instruction = "You are a concise competitive strategist. Formulate short, direct, accurate feature comparisons without filler words."
+        system_instruction = "You write in short, simple words. Give clean, compact feature comparisons (2-5 words per cell). Zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

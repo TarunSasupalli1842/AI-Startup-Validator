@@ -16,7 +16,7 @@ export default function Footer() {
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-x-8 gap-y-2 text-xs font-bold text-slate-500 dark:text-slate-400">
-            <a href="#about" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">4 AI Agents</a>
+            <a href="#about" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Multi-Agent System</a>
             <a href="#features" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Features</a>
             <a href="#validator" className="hover:text-brand-600 dark:hover:text-brand-400 transition-colors">Validate Idea</a>
           </div>

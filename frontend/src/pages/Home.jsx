@@ -26,48 +26,48 @@ export default function Home() {
 
   const sampleIdeas = [
     {
-      label: "🌱 AgriScan AI",
-      tag: "AgTech",
+      label: "🏨 HotelHive",
+      tag: "HospitalityTech",
+      badgeColor: "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/30",
+      desc: "AI guest concierge & direct booking platform for boutique hotels",
+      data: {
+        name: "HotelHive",
+        industry: "Hospitality Tech / Smart Operations",
+        target_audience: "Boutique hotels, independent B&Bs, and resort operators",
+        problem: "Independent boutique hotels lose 15-25% revenue to OTA commissions, face 24/7 front-desk guest inquiry overload, and lack automated direct booking systems.",
+        solution: "An AI-powered guest operations platform that handles 24/7 guest requests via WhatsApp, automates contactless check-ins, and drives direct commission-free bookings.",
+        revenue_model: "Tiered SaaS subscription ($99-$299/month per property) + 1.5% fee on direct bookings",
+        additional_notes: "Includes seamless integration with major PMS systems (Cloudbeds, Opera) and WhatsApp Business API."
+      }
+    },
+    {
+      label: "📚 StudyFlow AI",
+      tag: "EdTech",
+      badgeColor: "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/30",
+      desc: "Smart study companion turning lectures into flashcards & mock exams",
+      data: {
+        name: "StudyFlow AI",
+        industry: "EdTech / AI Learning Tools",
+        target_audience: "College & university students and certification seekers",
+        problem: "Students spend hours summarizing dense lecture slides and textbook chapters manually, leading to inefficient study habits and poor exam recall.",
+        solution: "An AI study assistant that converts lecture audio, PDF slides, and notes into structured smart flashcards, spaced-repetition quizzes, and interactive practice tests.",
+        revenue_model: "Freemium ($9.99/month Pro student subscription with unlimited course uploads)",
+        additional_notes: "Designed for mobile with offline flashcard sync and collaborative study decks."
+      }
+    },
+    {
+      label: "🥗 FreshPlate AI",
+      tag: "FoodTech",
       badgeColor: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30",
-      desc: "Computer vision crop disease diagnostics for small farmers",
+      desc: "Smart meal planner reducing household grocery waste and expenses",
       data: {
-        name: "AgriScan AI",
-        industry: "AgTech / AI Crop Health",
-        target_audience: "Small-scale & organic farmers",
-        problem: "Small-scale farmers lose up to 30% of crop yield due to delayed crop disease diagnosis and lack of affordable agronomist consultation.",
-        solution: "A smartphone app using computer vision to instantly identify crop diseases from leaf photos and provide localized organic treatment plans.",
-        revenue_model: "Freemium & B2B Ag-retail subscription",
-        additional_notes: "Targeting small agricultural operators needing fast disease diagnosis."
-      }
-    },
-    {
-      label: "⚡ ChargePulse",
-      tag: "CleanTech",
-      badgeColor: "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 border-cyan-500/30",
-      desc: "Smart grid energy balancing platform for commercial EV hubs",
-      data: {
-        name: "ChargePulse",
-        industry: "CleanTech / EV Infrastructure",
-        target_audience: "Commercial real estate & EV station hubs",
-        problem: "EV charging station operators face high grid peak demand charges and station downtime due to unoptimized energy distribution.",
-        solution: "Smart AI energy management platform for EV hubs that balances dynamic grid loads and optimizes battery storage charging during off-peak hours.",
-        revenue_model: "SaaS Subscription + Energy Arbitrage Share",
-        additional_notes: "Uses OCPP open charging protocols."
-      }
-    },
-    {
-      label: "🩺 MedScript AI",
-      tag: "HealthTech",
-      badgeColor: "bg-violet-500/10 text-violet-600 dark:text-violet-400 border-violet-500/30",
-      desc: "Ambient voice AI clinical documentation for independent doctors",
-      data: {
-        name: "MedScript AI",
-        industry: "Healthcare / Clinical AI",
-        target_audience: "Independent clinics & outpatient physicians",
-        problem: "Doctors spend 2+ hours daily on manual EHR clinical documentation, leading to physician burnout and administrative overhead.",
-        solution: "Ambient voice AI assistant that transcribes patient visits in real-time, auto-populates SOAP notes, and generates HIPAA-compliant summaries.",
-        revenue_model: "Monthly SaaS subscription per physician seat",
-        additional_notes: "Designed for seamless integration with clinical workflows."
+        name: "FreshPlate AI",
+        industry: "FoodTech / Smart Living",
+        target_audience: "Busy professionals, budget-conscious families, and health enthusiasts",
+        problem: "Households waste over $1,500 annually on unused groceries and struggle with daily meal planning that fits their dietary goals and current fridge ingredients.",
+        solution: "A mobile app that generates personalized weekly recipes based on fridge ingredients on hand, automatically generates smart shopping lists, and tracks expiration dates.",
+        revenue_model: "Freemium ($6.99/month Premium plan) + Grocery delivery affiliate partnerships",
+        additional_notes: "Integrates with supermarket delivery APIs for 1-click ingredient replenishment."
       }
     }
   ];
@@ -149,7 +149,7 @@ export default function Home() {
           <div className="mt-8 flex flex-wrap justify-center gap-3 text-xs font-extrabold text-slate-700 dark:text-slate-200">
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 shadow-sm backdrop-blur-md">
               <Layers className="w-4 h-4 text-brand-500" />
-              <span>4 Swarm Agents</span>
+              <span>Multi-Agent System</span>
             </div>
             <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-white/80 dark:bg-slate-900/70 border border-slate-200/80 dark:border-slate-800 shadow-sm backdrop-blur-md">
               <Globe className="w-4 h-4 text-cyan-500" />
@@ -172,12 +172,6 @@ export default function Home() {
             >
               Start Validating Concept
               <ArrowRight className="w-5 h-5 ml-2" />
-            </a>
-            <a
-              href="#about"
-              className="inline-flex items-center justify-center px-8 py-4 text-base font-bold text-slate-700 bg-white/80 border border-slate-200/80 rounded-2xl hover:bg-slate-50 dark:bg-slate-900/80 dark:text-slate-200 dark:border-slate-800 dark:hover:bg-slate-800 transition-all duration-200 shadow-sm"
-            >
-              Explore 4 AI Agents
             </a>
           </div>
 
@@ -225,34 +219,32 @@ export default function Home() {
       {/* About Multi-Agent System Section */}
       <section id="about" className="py-16 border-t border-slate-200/60 dark:border-slate-900/60">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center max-w-3xl mx-auto mb-16">
+          <div className="text-center max-w-3xl mx-auto mb-14">
             <span className="text-xs font-black uppercase tracking-widest text-brand-600 dark:text-brand-400">
-              Cooperative Multi-Agent Swarm Intelligence
+              Core Validation Engine
             </span>
             <h2 className="font-display font-black text-3xl sm:text-4xl tracking-tight text-slate-900 dark:text-white mt-2">
-              Specialized AI Agents Working in Orchestration
+              Main AI Agents Working in Orchestration
             </h2>
-            <p className="mt-4 text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
-              Instead of relying on a single generic prompt, ValiStart orchestrates specialized AI agents that build rich contextual intelligence across market research, risk audit, MoSCoW MVP, GTM roadmap, and conversational advisory.
+            <p className="mt-3 text-sm text-slate-600 dark:text-slate-400 leading-relaxed font-medium">
+              Four specialized AI agents collaborate to evaluate your startup idea across market sizing, competitors, venture risk, and launch execution.
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 max-w-6xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
             {[
-              { num: "01", name: "Extraction & Market Research", desc: "Isolates value propositions and queries live web search for macro industry growth & customer demand.", color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
-              { num: "02", name: "Competitor & Moat Analysis", desc: "Catalogues market alternatives, calculates feature matrices, and evaluates defensible competitive moats.", color: "text-rose-500 bg-rose-500/10 border-rose-500/20" },
-              { num: "03", name: "SWOT Analysis Agent", desc: "Performs deep LLM reasoning across internal strengths, vulnerabilities, market tailwinds, and macro threats.", color: "text-blue-500 bg-blue-500/10 border-blue-500/20" },
-              { num: "04", name: "Multi-Pillar Risk Agent", desc: "Audits 6 risk domains (Market, Competitor, Financial, Tech, Ops, Customer) with probability & mitigations.", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
-              { num: "05", name: "MoSCoW MVP Roadmap", desc: "Categorizes features strictly into Must-Have, Should-Have, Could-Have, and Won't-Have build roadmaps.", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
-              { num: "06", name: "GTM & Conversational Advisor", desc: "Formulates positioning, acquisition funnels, launch steps, and provides an interactive chatbot advisor.", color: "text-teal-500 bg-teal-500/10 border-teal-500/20" },
+              { num: "01", name: "Market Sizing & Demand Agent", desc: "Calculates TAM, SAM, and SOM in Indian Rupees (₹), customer willingness to pay, and real-time industry demand.", color: "text-violet-500 bg-violet-500/10 border-violet-500/20" },
+              { num: "02", name: "Competitor & Moat Agent", desc: "Finds direct market alternatives, builds feature comparison tables, and pinpoints defensible competitive moats.", color: "text-rose-500 bg-rose-500/10 border-rose-500/20" },
+              { num: "03", name: "SWOT & Venture Risk Agent", desc: "Evaluates internal strengths and weaknesses while auditing 6 venture risk pillars with actionable mitigations.", color: "text-amber-500 bg-amber-500/10 border-amber-500/20" },
+              { num: "04", name: "MVP Roadmap & GTM Agent", desc: "Builds a clear MoSCoW feature roadmap, 3-phase launch roadmap, and pricing packages in Indian Rupees (₹).", color: "text-emerald-500 bg-emerald-500/10 border-emerald-500/20" },
             ].map((agent, idx) => (
-              <div key={idx} className="glass-card glass-card-hover p-6 rounded-3xl space-y-3 relative overflow-hidden">
+              <div key={idx} className="glass-card glass-card-hover p-6 rounded-3xl space-y-3 relative overflow-hidden border border-slate-200/80 dark:border-slate-800">
                 <div className="flex items-center justify-between">
                   <div className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm border ${agent.color}`}>
                     {agent.num}
                   </div>
                   <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 dark:text-slate-500">
-                    Agent {agent.num}
+                    Main Agent {agent.num}
                   </span>
                 </div>
                 <h3 className="font-display font-extrabold text-base text-slate-900 dark:text-white">
@@ -283,7 +275,7 @@ export default function Home() {
                 Submit Your Startup Idea
               </h2>
               <p className="text-xs sm:text-sm text-brand-100 mt-2 max-w-xl leading-relaxed">
-                Enter your startup concept below. Our 4 AI agents will inspect the market, evaluate problem-solution fit, analyze competitors, and generate your report.
+                Enter your startup concept below. Our AI agents will inspect the market, evaluate problem-solution fit, analyze competitors, and generate your report.
               </p>
             </div>
 
@@ -307,7 +299,7 @@ export default function Home() {
                     name="name"
                     value={formData.name}
                     onChange={handleInputChange}
-                    placeholder="e.g. AgriScan AI"
+                    placeholder="e.g. HotelHive"
                     className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm"
                     required
                   />
@@ -324,7 +316,7 @@ export default function Home() {
                     name="industry"
                     value={formData.industry}
                     onChange={handleInputChange}
-                    placeholder="e.g. AgTech / AI Crop Diagnostics"
+                    placeholder="e.g. Hospitality Tech / Smart Operations"
                     className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm"
                     required
                   />
@@ -342,7 +334,7 @@ export default function Home() {
                   name="target_audience"
                   value={formData.target_audience}
                   onChange={handleInputChange}
-                  placeholder="e.g. Small-scale & organic farmers needing fast disease diagnosis"
+                  placeholder="e.g. Boutique hotels, independent B&Bs, and resort operators"
                   className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm"
                   required
                 />
@@ -362,7 +354,7 @@ export default function Home() {
                   rows="3"
                   value={formData.problem}
                   onChange={handleInputChange}
-                  placeholder="Describe the target problem in detail. e.g. Small-scale farmers lose up to 30% of crop yield due to delayed crop disease diagnosis and lack of affordable agronomists."
+                  placeholder="Describe the target problem in detail. e.g. Independent boutique hotels lose 15-25% revenue to OTA commissions and face 24/7 front-desk guest inquiry overload."
                   className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm leading-relaxed"
                   required
                 />
@@ -382,7 +374,7 @@ export default function Home() {
                   rows="3"
                   value={formData.solution}
                   onChange={handleInputChange}
-                  placeholder="Describe your proposed solution. e.g. A smartphone app using computer vision to instantly identify crop diseases from leaf photos and provide localized organic treatment plans."
+                  placeholder="Describe your proposed solution. e.g. An AI-powered guest operations platform that handles 24/7 guest requests via WhatsApp, automates contactless check-ins, and drives direct bookings."
                   className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm leading-relaxed"
                   required
                 />
@@ -400,7 +392,7 @@ export default function Home() {
                     name="revenue_model"
                     value={formData.revenue_model}
                     onChange={handleInputChange}
-                    placeholder="e.g. Freemium + B2B SaaS subscription"
+                    placeholder="e.g. Tiered SaaS subscription + 1.5% fee on direct bookings"
                     className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm"
                   />
                 </div>
@@ -415,7 +407,7 @@ export default function Home() {
                     name="additional_notes"
                     value={formData.additional_notes}
                     onChange={handleInputChange}
-                    placeholder="e.g. Focus on offline mobile support"
+                    placeholder="e.g. PMS integration and WhatsApp Business API"
                     className="w-full px-4 py-3.5 rounded-2xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-500/30 focus:border-brand-500 dark:bg-slate-950 dark:border-slate-800 dark:text-slate-100 dark:placeholder-slate-500 transition-all text-sm font-medium shadow-sm"
                   />
                 </div>
@@ -427,7 +419,7 @@ export default function Home() {
                   className="w-full inline-flex items-center justify-center px-8 py-4 text-base font-extrabold text-white bg-gradient-to-r from-brand-600 via-teal-600 to-indigo-600 rounded-2xl hover:from-brand-700 hover:to-indigo-700 hover:shadow-xl hover:shadow-brand-500/25 active:scale-[0.99] transition-all duration-200 cursor-pointer shadow-lg"
                 >
                   <Sparkles className="w-5 h-5 mr-2 animate-pulse-slow" />
-                  Validate Startup Idea (Run 4 AI Swarm Agents)
+                  Validate Startup Idea
                 </button>
               </div>
             </form>

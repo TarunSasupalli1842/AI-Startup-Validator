@@ -38,51 +38,45 @@ class MvpRecommendationAgent:
         """
 
         prompt = f"""
-        Formulate a razor-sharp, actionable MVP product plan using the MoSCoW framework for this startup:
+        Formulate a MoSCoW MVP roadmap using simple, clear words for:
         {context}
 
-        Requirements:
-        - Consider market fit, primary customer pain points, resource constraints, and technical complexity.
-        - MUST HAVE: 3 core essential features needed to deliver the core value proposition.
-        - SHOULD HAVE: 2 high-impact features for immediate post-MVP retention.
-        - COULD HAVE: 2 nice-to-have features for future delight.
-        - WON'T HAVE: 2 features explicitly deferred to prevent scope creep.
+        RULES:
+        - Use simple, everyday words.
+        - MUST HAVE: 3 core essential features.
+        - SHOULD HAVE: 2 high-impact next features.
+        - COULD HAVE: 2 nice-to-have features.
+        - WON'T HAVE: 2 features to defer.
+        - feature_name: Short simple title (max 3-4 words).
+        - description: 1 short simple sentence (max 10 words).
+        - rationale: 1 short simple sentence (max 8 words).
+        - mvp_summary: 1 short simple sentence (max 12 words).
+        - development_approach: 1 short simple sentence (max 12 words).
+        - target_timeline_weeks: e.g. "4-6 Weeks".
 
-        Each feature must have:
-        - feature_name: Short title (max 5 words)
-        - description: 1 concise sentence describing functionality.
-        - rationale: 1 short sentence explaining why it's placed in this MoSCoW bucket.
-        - complexity: "Low" | "Medium" | "High"
-        - priority: "MUST HAVE" | "SHOULD HAVE" | "COULD HAVE" | "WON'T HAVE"
-
-        Also provide:
-        - mvp_summary: 1 concise sentence describing the MVP build philosophy.
-        - target_timeline_weeks: Estimated build timeframe (e.g. "4-6 Weeks").
-        - development_approach: 1 concise sentence on recommended tech stack and build strategy.
-
-        Return strictly a JSON object matching this schema:
+        Return strictly as a JSON object:
         {{
-            "mvp_summary": "1 concise sentence defining core MVP scope.",
+            "mvp_summary": "1 short simple sentence on MVP focus.",
             "target_timeline_weeks": "4-6 Weeks",
-            "development_approach": "Build a modular React/FastAPI prototype with external API integrations to test core loop.",
+            "development_approach": "Build simple web prototype to test core value.",
             "must_have": [
                 {{
-                    "feature_name": "Feature 1",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Must-Have.",
                     "complexity": "Medium",
                     "priority": "MUST HAVE"
                 }},
                 {{
-                    "feature_name": "Feature 2",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name 2",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Must-Have.",
                     "complexity": "Low",
                     "priority": "MUST HAVE"
                 }},
                 {{
-                    "feature_name": "Feature 3",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name 3",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Must-Have.",
                     "complexity": "Medium",
                     "priority": "MUST HAVE"
@@ -90,31 +84,31 @@ class MvpRecommendationAgent:
             ],
             "should_have": [
                 {{
-                    "feature_name": "Feature 4",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name 4",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Should-Have.",
                     "complexity": "Medium",
                     "priority": "SHOULD HAVE"
                 }},
                 {{
-                    "feature_name": "Feature 5",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name 5",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Should-Have.",
-                    "complexity": "High",
+                    "complexity": "Low",
                     "priority": "SHOULD HAVE"
                 }}
             ],
             "could_have": [
                 {{
-                    "feature_name": "Feature 6",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name 6",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Could-Have.",
                     "complexity": "Low",
                     "priority": "COULD HAVE"
                 }},
                 {{
-                    "feature_name": "Feature 7",
-                    "description": "Feature description sentence.",
+                    "feature_name": "Short Feature Name 7",
+                    "description": "Short simple functionality sentence.",
                     "rationale": "Why it is Could-Have.",
                     "complexity": "Medium",
                     "priority": "COULD HAVE"
@@ -122,16 +116,16 @@ class MvpRecommendationAgent:
             ],
             "wont_have": [
                 {{
-                    "feature_name": "Feature 8",
-                    "description": "Feature description sentence.",
-                    "rationale": "Why it is out of scope for MVP.",
+                    "feature_name": "Deferred Feature 1",
+                    "description": "Short description of out-of-scope item.",
+                    "rationale": "Save time for MVP.",
                     "complexity": "High",
                     "priority": "WON'T HAVE"
                 }},
                 {{
-                    "feature_name": "Feature 9",
-                    "description": "Feature description sentence.",
-                    "rationale": "Why it is out of scope for MVP.",
+                    "feature_name": "Deferred Feature 2",
+                    "description": "Short description of out-of-scope item.",
+                    "rationale": "Avoid scope creep.",
                     "complexity": "High",
                     "priority": "WON'T HAVE"
                 }}
@@ -139,7 +133,7 @@ class MvpRecommendationAgent:
         }}
         """
 
-        system_instruction = "You are a pragmatic VP of Product and technical founder. Design laser-focused MoSCoW MVP feature scopes that minimize time-to-market and maximize customer learning."
+        system_instruction = "You write in short, simple words. Formulate clean, compact MoSCoW MVP feature roadmaps. Zero fluff or long descriptions."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

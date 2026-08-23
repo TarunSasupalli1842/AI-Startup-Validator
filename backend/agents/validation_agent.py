@@ -93,29 +93,23 @@ class ValidationAgent:
         """
         
         prompt = f"""
-        Synthesize the final Startup Validation Executive Summary and Multi-Metric Scoring from findings below:
+        Synthesize the Startup Validation Executive Summary and Scoring using simple, plain words:
         {context}
         
-        STRICT REQUIREMENT: Be extremely concise, direct, accurate, and genuine. Avoid long matter or repetitive text.
-        - high_level_description: 1 concise sentence describing concept, problem solved, and solution.
-        - target_market_summary: 1 concise sentence on market sizing and target customer opportunity.
-        - feasibility_verdict: Short assessment title followed by 1 short rationale sentence.
-        - validation_scores: Evaluate realistic 0-100 scores for:
-          * problem_clarity
-          * solution_strength
-          * market_potential
-          * competition_risk (higher number = safer / lower risk)
-          * feasibility
-          * innovation
-          * overall_score (weighted average)
-        - ai_recommendations: 5 direct, actionable 1-sentence next steps.
+        RULES:
+        - Use simple, easy-to-read language. Strictly avoid long matter or filler words.
+        - high_level_description: 1 short simple sentence (max 15 words).
+        - target_market_summary: 1 short simple sentence (max 15 words).
+        - feasibility_verdict: Simple title + 1 short reason (e.g. "High Viability — Strong demand from users.").
+        - validation_scores: Evaluate realistic 0-100 scores.
+        - ai_recommendations: Exactly 5 short, simple action steps (under 10 words each).
         
-        Return strictly a JSON object matching this schema:
+        Return strictly a JSON object:
         {{
             "summary": {{
-                "high_level_description": "1 concise sentence overview of startup concept.",
-                "target_market_summary": "1 concise sentence overview of target market.",
-                "feasibility_verdict": "High Viability. 1 short rationale sentence."
+                "high_level_description": "1 short simple sentence.",
+                "target_market_summary": "1 short simple sentence.",
+                "feasibility_verdict": "High Viability — 1 short reason."
             }},
             "validation_scores": {{
                 "problem_clarity": 88,
@@ -127,16 +121,16 @@ class ValidationAgent:
                 "overall_score": 82
             }},
             "ai_recommendations": [
-                "1. Lean MVP: Build prototype for core solution.",
-                "2. User Testing: Test with 20 early target users.",
-                "3. Monetization Test: Validate willingness to pay.",
-                "4. Defensibility: Focus on proprietary workflow speed.",
-                "5. Acquisition Channel: Leverage targeted organic channels."
+                "1. Build simple prototype for core feature.",
+                "2. Interview 15 target users for feedback.",
+                "3. Offer beta access to test pricing.",
+                "4. Automate manual steps to save user time.",
+                "5. Share free demo in niche communities."
             ]
         }}
         """
         
-        system_instruction = "You are an elite venture capital analyst and startup incubator judge. Synthesize validation scores and recommendations with surgical precision and honesty."
+        system_instruction = "You write in short, simple words. Keep all summaries and recommendations compact, clear, and direct without complex vocabulary or long matter."
         
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

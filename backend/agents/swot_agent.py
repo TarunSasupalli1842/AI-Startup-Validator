@@ -27,55 +27,49 @@ class SwotAgent:
         competitor_names = ", ".join([c.name for c in competitors.competitors])
 
         prompt = f"""
-        Conduct a comprehensive, objective SWOT Analysis for this startup:
+        Conduct a SWOT Analysis using simple, clear words for:
         Startup Name: {idea.startup_name}
         Core Problem: {idea.core_problem}
         Proposed Solution: {idea.core_solution}
         Industry: {idea.industry}
         Target Audience: {idea.target_audience}
-        Revenue Model: {idea.revenue_model}
-        Unique Moat: {competitors.unique_moat}
-        TAM/SAM: {opportunity.tam} / {opportunity.sam}
-        Competitors: {competitor_names}
-        Market Trends: {", ".join(research.industry_trends)}
+        
+        RULES:
+        - Use simple, everyday words.
+        - Exactly 4 bullet points per quadrant.
+        - Strictly 4 to 7 simple words per bullet point.
+        - No long matter, buzzwords, or filler.
 
-        Requirements:
-        - Provide exactly 4 concise, high-impact bullet points per quadrant (max 10 words per bullet).
-        - Strengths: Internal distinctive capabilities, proprietary tech, cost structure, or domain UX advantage.
-        - Weaknesses: Internal resource limitations, brand anonymity, lack of historical data, or initial niche focus.
-        - Opportunities: External market tailwinds, whitespace niches, enterprise expansion, or integration ecosystem.
-        - Threats: External competitor copycats, platform shifts, legacy vendor retention, or CAC spikes.
-
-        Return strictly a JSON object matching this schema:
+        Return strictly as a JSON object:
         {{
             "strengths": [
-                "crisp strength 1",
-                "crisp strength 2",
-                "crisp strength 3",
-                "crisp strength 4"
+                "strength 1 (4-7 simple words)",
+                "strength 2",
+                "strength 3",
+                "strength 4"
             ],
             "weaknesses": [
-                "crisp weakness 1",
-                "crisp weakness 2",
-                "crisp weakness 3",
-                "crisp weakness 4"
+                "weakness 1 (4-7 simple words)",
+                "weakness 2",
+                "weakness 3",
+                "weakness 4"
             ],
             "opportunities": [
-                "crisp opportunity 1",
-                "crisp opportunity 2",
-                "crisp opportunity 3",
-                "crisp opportunity 4"
+                "opportunity 1 (4-7 simple words)",
+                "opportunity 2",
+                "opportunity 3",
+                "opportunity 4"
             ],
             "threats": [
-                "crisp threat 1",
-                "crisp threat 2",
-                "crisp threat 3",
-                "crisp threat 4"
+                "threat 1 (4-7 simple words)",
+                "threat 2",
+                "threat 3",
+                "threat 4"
             ]
         }}
         """
 
-        system_instruction = "You are a senior venture partner conducting due diligence. Provide realistic, concise, and strategically sharp SWOT analysis with zero generic filler."
+        system_instruction = "You write in short, simple words. Provide direct, compact SWOT bullets (4-7 words each). Zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

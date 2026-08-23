@@ -16,68 +16,74 @@ class CustomerSegmentationAgent:
         logger.info(f"[{self.name}] mapping customer personas for startup: '{idea.startup_name}'")
 
         prompt = f"""
-        Build Customer Segmentation for:
+        Map customer personas using simple, clear words for:
         Startup Name: {idea.startup_name}
         Core Problem: {idea.core_problem}
         Proposed Solution: {idea.core_solution}
         Target Audience: {idea.target_audience}
         Industry: {idea.industry}
         
-        Keep all profiles, pain points, channels, and strategy concise (max 10 words per bullet, 1 short sentence per profile).
-        Return strictly a JSON object matching this schema:
+        RULES:
+        - Use simple, everyday words.
+        - target_profile: 1 short sentence (max 12 words).
+        - Bullets: 4 to 8 simple words each.
+        - willingness_to_pay: In Indian Rupees (e.g., "High (₹2,999 - ₹7,999/mo)").
+        - segmentation_strategy: 1 short simple sentence.
+
+        Return strictly as a JSON object:
         {{
             "primary_segment": {{
-                "persona_name": "Concise Persona Name",
-                "target_profile": "1 short sentence profile.",
+                "persona_name": "Simple Name",
+                "target_profile": "1 short simple profile sentence.",
                 "key_pain_points": [
-                    "crisp pain point 1",
-                    "crisp pain point 2"
+                    "pain point 1 (4-8 simple words)",
+                    "pain point 2"
                 ],
-                "willingness_to_pay": "High ($XX - $XXX/mo)",
+                "willingness_to_pay": "High (₹2,999 - ₹7,999/mo)",
                 "acquisition_channels": [
                     "channel 1",
                     "channel 2"
                 ],
                 "buying_triggers": [
-                    "crisp trigger 1",
-                    "crisp trigger 2"
+                    "trigger 1",
+                    "trigger 2"
                 ]
             }},
             "secondary_segments": [
                 {{
-                    "persona_name": "Secondary Persona Name",
-                    "target_profile": "1 short sentence profile.",
+                    "persona_name": "Secondary Name",
+                    "target_profile": "1 short simple profile sentence.",
                     "key_pain_points": [
-                        "crisp pain point 1"
+                        "pain point 1"
                     ],
-                    "willingness_to_pay": "Medium ($XX - $XX/mo)",
+                    "willingness_to_pay": "Medium (₹1,499 - ₹2,999/mo)",
                     "acquisition_channels": [
                         "channel 1"
                     ],
                     "buying_triggers": [
-                        "crisp trigger 1"
+                        "trigger 1"
                     ]
                 }},
                 {{
-                    "persona_name": "Growth Persona Name",
-                    "target_profile": "1 short sentence profile.",
+                    "persona_name": "Team / Growth Name",
+                    "target_profile": "1 short simple profile sentence.",
                     "key_pain_points": [
-                        "crisp pain point 1"
+                        "pain point 1"
                     ],
-                    "willingness_to_pay": "Very High ($XXX+/mo)",
+                    "willingness_to_pay": "Very High (₹12,999+/mo)",
                     "acquisition_channels": [
                         "channel 1"
                     ],
                     "buying_triggers": [
-                        "crisp trigger 1"
+                        "trigger 1"
                     ]
                 }}
             ],
-            "segmentation_strategy": "1 crisp sentence go-to-market customer roadmap."
+            "segmentation_strategy": "1 short simple sentence on customer rollout."
         }}
         """
 
-        system_instruction = "You are a customer discovery expert. Keep personas and customer strategies direct, accurate, and concise without wordy filler."
+        system_instruction = "You write in short, simple words. Keep personas, pain points, and channels compact, clear, and direct. Zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)
@@ -103,7 +109,7 @@ class CustomerSegmentationAgent:
                     "Lack of unified workflow tools",
                     "High cost of legacy enterprise software"
                 ],
-                willingness_to_pay="High ($29 - $99/month)",
+                willingness_to_pay="High (₹2,499 - ₹7,999/month)",
                 acquisition_channels=[
                     "Direct Search & Content Marketing",
                     "Product-Led Growth (Freemium)",
@@ -123,7 +129,7 @@ class CustomerSegmentationAgent:
                         "Inconsistent team execution",
                         "Lack of analytics and reporting visibility"
                     ],
-                    willingness_to_pay="Very High ($199 - $499/month)",
+                    willingness_to_pay="Very High (₹15,999 - ₹39,999/month)",
                     acquisition_channels=[
                         "LinkedIn Outbound & Targeted Ads",
                         "Webinars and Industry Case Studies"
@@ -139,9 +145,9 @@ class CustomerSegmentationAgent:
                         "Limited time and engineering resources",
                         "Need plug-and-play simplicity"
                     ],
-                    willingness_to_pay="Moderate ($15 - $35/month)",
+                    willingness_to_pay="Moderate (₹1,299 - ₹2,999/month)",
                     acquisition_channels=[
-                        "Social Media (X, YouTube, TikTok)",
+                        "Social Media (X, YouTube, LinkedIn)",
                         "Affiliate & Partner Networks"
                     ],
                     buying_triggers=[

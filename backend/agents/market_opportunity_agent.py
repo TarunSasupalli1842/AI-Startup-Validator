@@ -24,7 +24,7 @@ class MarketOpportunityAgent:
         web_context = "\n\n---\n\n".join(snippets)
 
         prompt = f"""
-        Evaluate Market Opportunity (TAM, SAM, SOM, CAGR, Unit Economics) for:
+        Evaluate Market Opportunity (TAM, SAM, SOM, CAGR, Unit Economics) in Indian Rupees (INR / ₹) using simple, plain words:
         Startup Name: {idea.startup_name}
         Industry: {idea.industry}
         Target Audience: {idea.target_audience}
@@ -33,31 +33,38 @@ class MarketOpportunityAgent:
         Search Context:
         {web_context or "Standard industry benchmark data."}
         
-        Keep all text entries short, direct, accurate, and genuine.
-        Return strictly a JSON object matching this schema:
+        RULES:
+        - Use simple, everyday words. Keep all text short and clean.
+        - TAM, SAM, SOM, CAC, LTV must be in Indian Rupees (INR / ₹) using Cr (e.g. "₹2,50,000 Cr", "₹35,000 Cr", "₹1,200 Cr").
+        - market_drivers: Exactly 3 points (strictly 4-8 simple words each).
+        - entry_barriers: Exactly 3 points (strictly 4-8 simple words each).
+        - unit_economics_summary: 1 short simple sentence (max 15 words).
+        - pricing_power: 1 short phrase (e.g. "High — customers save valuable hours").
+
+        Return strictly as a JSON object:
         {{
-            "tam": "$XX.XB Industry Total Market",
-            "sam": "$X.XB Serviceable Segment",
-            "som": "$XXXM 3-Year Target",
-            "market_growth_rate": "XX.X% CAGR (2024-2030)",
+            "tam": "₹XX,XXX Cr Total Market",
+            "sam": "₹X,XXX Cr Target Market",
+            "som": "₹XXX Cr 3-Year Goal",
+            "market_growth_rate": "XX.X% CAGR",
             "market_drivers": [
-                "crisp driver 1 (max 10 words)",
-                "crisp driver 2",
-                "crisp driver 3"
+                "driver 1 (4-8 simple words)",
+                "driver 2",
+                "driver 3"
             ],
             "entry_barriers": [
-                "crisp barrier 1 (max 10 words)",
-                "crisp barrier 2",
-                "crisp barrier 3"
+                "barrier 1 (4-8 simple words)",
+                "barrier 2",
+                "barrier 3"
             ],
-            "unit_economics_summary": "1 concise sentence on CAC, LTV, and gross margins.",
-            "estimated_cac": "$XX - $XXX",
-            "estimated_ltv": "$XXX - $X,XXX",
-            "pricing_power": "High / Medium / Flexible - 1 short rationale"
+            "unit_economics_summary": "1 short simple sentence on profits and costs in ₹.",
+            "estimated_cac": "₹X,XXX - ₹X,XXX",
+            "estimated_ltv": "₹XX,XXX - ₹XX,XXX",
+            "pricing_power": "High — clear customer time savings"
         }}
         """
 
-        system_instruction = "You are a concise venture capitalist analyst. Provide accurate, compact TAM/SAM/SOM metrics and unit economics with zero fluff."
+        system_instruction = "You write in short, simple words. Provide compact, clean market numbers and metrics in Indian Rupees (₹). No jargon or extra matter."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)
@@ -69,9 +76,9 @@ class MarketOpportunityAgent:
             # Fallback estimation based on industry name length
             ind_clean = idea.industry.strip() or "SaaS"
             return MarketOpportunityData(
-                tam="$32.5 Billion Global Market",
-                sam="$6.8 Billion Addressable Segment",
-                som="$450 Million Realistic 3-Year Capture",
+                tam="₹2,70,000 Cr Global Sector Market",
+                sam="₹55,000 Cr Addressable Segment",
+                som="₹3,600 Cr Realistic 3-Year Capture",
                 market_growth_rate="16.4% CAGR (2024-2030)",
                 market_drivers=[
                     f"Rapid enterprise digital transformation in {ind_clean}",
@@ -85,7 +92,7 @@ class MarketOpportunityAgent:
                     "Initial customer acquisition cost in competitive ad markets"
                 ],
                 unit_economics_summary=f"Strong potential for 70%+ gross margins with recurring subscription revenue from {idea.target_audience}.",
-                estimated_cac="$45 - $120",
-                estimated_ltv="$450 - $1,200",
+                estimated_cac="₹3,500 - ₹9,500",
+                estimated_ltv="₹35,000 - ₹95,000",
                 pricing_power="High — tiered subscription model with strong expansion upsell potential."
             )

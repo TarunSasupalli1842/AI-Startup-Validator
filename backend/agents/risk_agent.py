@@ -47,93 +47,90 @@ class RiskAgent:
         """
 
         prompt = f"""
-        Conduct a multi-pillar Risk Analysis for the startup concept below:
+        Conduct a 6-pillar Risk Analysis using simple, clear words for:
         {context}
 
         Analyze all 6 risk pillars:
-        1. Market Risk (demand validation, market timing, market saturation)
-        2. Competitor Risk (incumbent response, barrier to entry, copycat clones)
-        3. Financial Risk (runway burn, CAC exceeding LTV, pricing pushback)
-        4. Technical Risk (API latency/dependence, scalability bottlenecks, reliability)
-        5. Operational Risk (key person dependency, execution speed, regulatory/data compliance)
-        6. Customer Risk (churn, long onboarding friction, low willingness to pay)
+        1. Market Risk
+        2. Competitor Risk
+        3. Financial Risk
+        4. Technical Risk
+        5. Operational Risk
+        6. Customer Risk
 
-        For each of the 6 pillars, specify:
-        - risk: 1 crisp sentence explaining the specific risk scenario.
-        - probability: "Low" | "Medium" | "High"
-        - impact: "Low" | "Medium" | "High" | "Critical"
-        - severity: "Low" | "Medium" | "High" | "Critical"
-        - mitigation: 1 concise actionable mitigation strategy (max 15 words).
+        RULES:
+        - Use simple, everyday words.
+        - risk: 1 short simple sentence (max 10 words).
+        - mitigation: 1 short simple sentence (max 8 words).
+        - overall_risk_level: "Low", "Moderate", "High", or "Critical".
+        - risk_summary: 1 short simple sentence (max 12 words).
+        - key_mitigation_priorities: Exactly 4 short, simple action bullets (max 8 words each).
+        - No long matter, jargon, or filler.
 
-        Also provide:
-        - overall_risk_level: "Low", "Moderate", "High", or "Critical"
-        - risk_summary: 1 concise sentence summarizing the core venture vulnerability.
-        - key_mitigation_priorities: 4 actionable, ranked bullet points for founders.
-
-        Return strictly a JSON object matching this schema:
+        Return strictly as a JSON object:
         {{
             "overall_risk_level": "Moderate",
-            "risk_summary": "1 concise sentence summary of overall venture risk.",
+            "risk_summary": "1 short simple summary sentence.",
             "risks": [
                 {{
                     "category": "Market Risk",
-                    "risk": "Description of market risk.",
+                    "risk": "Short simple risk sentence.",
                     "probability": "Medium",
                     "impact": "High",
                     "severity": "Medium",
-                    "mitigation": "Actionable mitigation strategy."
+                    "mitigation": "Short simple mitigation."
                 }},
                 {{
                     "category": "Competitor Risk",
-                    "risk": "Description of competitor risk.",
+                    "risk": "Short simple risk sentence.",
                     "probability": "High",
                     "impact": "Medium",
                     "severity": "High",
-                    "mitigation": "Actionable mitigation strategy."
+                    "mitigation": "Short simple mitigation."
                 }},
                 {{
                     "category": "Financial Risk",
-                    "risk": "Description of financial risk.",
+                    "risk": "Short simple risk sentence.",
                     "probability": "Low",
                     "impact": "High",
                     "severity": "Medium",
-                    "mitigation": "Actionable mitigation strategy."
+                    "mitigation": "Short simple mitigation."
                 }},
                 {{
                     "category": "Technical Risk",
-                    "risk": "Description of technical risk.",
+                    "risk": "Short simple risk sentence.",
                     "probability": "Medium",
                     "impact": "Medium",
                     "severity": "Medium",
-                    "mitigation": "Actionable mitigation strategy."
+                    "mitigation": "Short simple mitigation."
                 }},
                 {{
                     "category": "Operational Risk",
-                    "risk": "Description of operational risk.",
+                    "risk": "Short simple risk sentence.",
                     "probability": "Low",
                     "impact": "Medium",
                     "severity": "Low",
-                    "mitigation": "Actionable mitigation strategy."
+                    "mitigation": "Short simple mitigation."
                 }},
                 {{
                     "category": "Customer Risk",
-                    "risk": "Description of customer risk.",
+                    "risk": "Short simple risk sentence.",
                     "probability": "Medium",
                     "impact": "High",
                     "severity": "Medium",
-                    "mitigation": "Actionable mitigation strategy."
+                    "mitigation": "Short simple mitigation."
                 }}
             ],
             "key_mitigation_priorities": [
-                "1. Priority 1 mitigation action",
-                "2. Priority 2 mitigation action",
-                "3. Priority 3 mitigation action",
-                "4. Priority 4 mitigation action"
+                "1. Priority action (under 8 words)",
+                "2. Priority action",
+                "3. Priority action",
+                "4. Priority action"
             ]
         }}
         """
 
-        system_instruction = "You are a startup risk management expert and venture auditor. Evaluate risks candidly, accurately, and provide realistic mitigations."
+        system_instruction = "You write in short, simple words. Give direct risk assessments and compact mitigations (under 8 words). Zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

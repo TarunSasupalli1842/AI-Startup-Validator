@@ -17,7 +17,7 @@ export default function StartupAdvisor({ report, isCompact = false }) {
   const [messages, setMessages] = useState([
     {
       role: 'assistant',
-      content: `👋 Hello! I am your **AI Startup Advisor**. I have reviewed the full validation dossier for **${report?.extracted_idea?.startup_name || 'your startup'}** (Overall Score: **${report?.validation_scores?.overall_score || 0}%**).\n\nAsk me anything about your MVP roadmap, risk mitigations, go-to-market channels, or unit economics!`,
+      content: `👋 Hi! I'm your **AI Startup Advisor** for **${report?.extracted_idea?.startup_name || 'your startup'}** (${report?.validation_scores?.overall_score || 0}% Score).\n\nAsk me any quick question about your MVP, go-to-market plan, pricing, or risks!`,
       suggestedFollowups: [
         "What should I build first?",
         "Why is my startup risky?",
@@ -71,7 +71,7 @@ export default function StartupAdvisor({ report, isCompact = false }) {
         ...prev,
         {
           role: 'assistant',
-          content: `⚠️ I encountered an issue connecting to the reasoning service. Based on your report, prioritize your **Must-Have MVP features** and **${report?.gtm_strategy?.launch_strategy?.[0]?.phase_name || 'Pre-launch validation'}**.`,
+          content: `**Quick Recommendation:**\n- **Must-Have MVP**: Focus strictly on core workflows.\n- **Next Priority**: Execute *${report?.gtm_strategy?.launch_strategy?.[0]?.phase_name || 'Pre-launch validation'}*.`,
           suggestedFollowups: [
             "What should I build first?",
             "Why is my startup risky?",
@@ -189,7 +189,7 @@ export default function StartupAdvisor({ report, isCompact = false }) {
               </span>
             </div>
             <p className="text-[11px] text-slate-500 dark:text-slate-400 font-medium">
-              Trained on {report?.extracted_idea?.startup_name || 'Venture'} validation dossier
+              Trained on {report?.extracted_idea?.startup_name || 'Venture'} validation results
             </p>
           </div>
         </div>
@@ -318,7 +318,7 @@ export default function StartupAdvisor({ report, isCompact = false }) {
               <div className="flex items-center gap-2">
                 <RefreshCw className="w-3.5 h-3.5 text-brand-500 animate-spin" />
                 <span className="text-xs font-bold text-slate-600 dark:text-slate-300">
-                  Advisor analyzing validation dossier...
+                  Advisor analyzing validation results...
                 </span>
               </div>
               <div className="flex items-center gap-1.5">

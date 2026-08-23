@@ -45,110 +45,109 @@ class GtmAgent:
         """
 
         prompt = f"""
-        Generate an aggressive, actionable Go-To-Market (GTM) strategy for this startup:
-        {context}
+        Formulate a Go-To-Market strategy using simple, clear words for:
+        Startup Name: {idea.startup_name}
+        Core Problem: {idea.core_problem}
+        Proposed Solution: {idea.core_solution}
+        Industry: {idea.industry}
+        Revenue Model: {idea.revenue_model}
+        Unique Moat: {competitors.unique_moat}
 
-        Provide:
-        1. Positioning: One sharp sentence using standard positioning syntax ("For [target] who [need], {idea.startup_name} is a [category] that [benefit], unlike [competitors], our product [moat].")
-        2. Target Customers: 3 specific early-adopter buyer descriptions.
-        3. Acquisition Channels: 3 distinct high-leverage channels. Each with:
-           - channel_name
-           - description (1 concise execution sentence)
-           - expected_cac (e.g. "$20-$50 per acquired user" or "Organic / <$10")
-           - conversion_strategy (1 concise sentence on turning traffic into signups)
-        4. Launch Strategy: 3 chronological phases:
-           - phase_name (e.g. "Phase 1: Alpha & Waitlist Building", "Phase 2: Community Beta Launch", "Phase 3: Scaled Growth & Paid Outreach")
-           - timeline (e.g. "Weeks 1-4", "Weeks 5-8", "Weeks 9-16")
-           - key_activities (3 concise actionable bullets per phase)
-           - goals (1 crisp measurable milestone)
-        5. Pricing Strategy: 1 concise sentence describing the monetization model.
-        6. Pricing Tiers: 3 realistic pricing packages with price points and limits.
-        7. Key KPIs: 4 primary metrics that determine startup traction (e.g. "Activation Rate > 40%", "CAC Payback < 6 months", "Weekly User Retention > 35%", "Monthly Recurring Revenue $10k+").
-        8. How to Get Started: Exactly 5 immediate, sequential steps answering "How do we get started right now this week?"
+        RULES:
+        - Use simple, everyday words. Keep sentences short and direct.
+        - positioning_statement: 1 short simple sentence (max 15 words).
+        - target_customers: 3 short customer profiles (max 8 words each).
+        - acquisition_channels: 3 channels (description max 10 words, expected_cac in ₹, conversion_strategy max 8 words).
+        - launch_strategy: 3 phases (3 short activity bullets per phase, max 7 words per bullet).
+        - pricing_strategy: 1 short simple sentence (max 12 words).
+        - pricing_tiers: 3 short tiers in Indian Rupees (₹).
+        - key_kpis: 4 short simple metrics (max 6 words each).
+        - how_to_get_started: Exactly 5 short action steps (max 8 words each).
+        - No long matter, jargon, or filler.
 
-        Return strictly a JSON object matching this schema:
+        Return strictly as a JSON object:
         {{
-            "positioning_statement": "For [target], {idea.startup_name} is the...",
+            "positioning_statement": "Simple 1-sentence positioning statement.",
             "target_customers": [
-                "Customer profile 1",
+                "Customer profile 1 (under 8 words)",
                 "Customer profile 2",
                 "Customer profile 3"
             ],
             "acquisition_channels": [
                 {{
                     "channel_name": "Channel Name",
-                    "description": "How to execute this channel.",
-                    "expected_cac": "$XX - $XX",
-                    "conversion_strategy": "Lead magnet to interactive sandbox trial."
+                    "description": "Short execution sentence (max 10 words).",
+                    "expected_cac": "Low (₹500 - ₹1,500)",
+                    "conversion_strategy": "Free interactive demo trial."
                 }},
                 {{
                     "channel_name": "Channel Name 2",
-                    "description": "How to execute this channel.",
-                    "expected_cac": "$XX - $XX",
-                    "conversion_strategy": "Direct demo booking."
+                    "description": "Short execution sentence (max 10 words).",
+                    "expected_cac": "Moderate (₹2,500 - ₹5,000)",
+                    "conversion_strategy": "Direct demo calls."
                 }},
                 {{
                     "channel_name": "Channel Name 3",
-                    "description": "How to execute this channel.",
-                    "expected_cac": "Organic ($0 - $15)",
-                    "conversion_strategy": "Community viral referrals."
+                    "description": "Short execution sentence (max 10 words).",
+                    "expected_cac": "Organic (₹0 - ₹500)",
+                    "conversion_strategy": "Community word of mouth."
                 }}
             ],
             "launch_strategy": [
                 {{
-                    "phase_name": "Phase 1: Private Alpha & Pre-Launch",
+                    "phase_name": "Phase 1: Alpha & Waitlist",
                     "timeline": "Weeks 1-4",
                     "key_activities": [
-                        "Activity 1",
-                        "Activity 2",
-                        "Activity 3"
+                        "Build clean landing page and demo",
+                        "Interview 20 target users",
+                        "Collect initial 100 waitlist signups"
                     ],
-                    "goals": "Onboard 25 active beta testers and achieve 80% satisfaction."
+                    "goals": "Validate core user problem with 20 testers."
                 }},
                 {{
-                    "phase_name": "Phase 2: Public Beta & Community Launch",
+                    "phase_name": "Phase 2: Closed Beta",
                     "timeline": "Weeks 5-8",
                     "key_activities": [
-                        "Activity 1",
-                        "Activity 2",
-                        "Activity 3"
+                        "Give beta access to waitlist",
+                        "Fix bugs and improve speed",
+                        "Collect 5 positive testimonials"
                     ],
-                    "goals": "Acquire first 250 registered users and 15 paid conversions."
+                    "goals": "Reach 40%+ weekly active user retention."
                 }},
                 {{
-                    "phase_name": "Phase 3: Scale & Multi-Channel Acquisition",
+                    "phase_name": "Phase 3: Public Launch",
                     "timeline": "Weeks 9-16",
                     "key_activities": [
-                        "Activity 1",
-                        "Activity 2",
-                        "Activity 3"
+                        "Launch on Product Hunt and forums",
+                        "Start targeted search marketing",
+                        "Introduce discounted paid annual plan"
                     ],
-                    "goals": "Scale to $5,000 MRR with under 60-day CAC payback."
+                    "goals": "Reach first ₹4,00,000 monthly revenue."
                 }}
             ],
-            "pricing_strategy": "Freemium tiered SaaS model converting power users to monthly subscription.",
+            "pricing_strategy": "Simple freemium plan converting active users to paid monthly tier.",
             "pricing_tiers": [
-                "Starter (Free): Core trial features with monthly usage caps.",
-                "Pro ($29-$49/mo): Unlimited automation workflows and priority support.",
-                "Team / Enterprise ($149+/mo): Multi-seat access, export integrations, and dedicated SLA."
+                "Starter (Free): Basic core features with monthly limits.",
+                "Pro (₹2,499/mo): Unlimited workflows and fast support.",
+                "Team (₹9,999/mo): Multi-seat access and priority speed."
             ],
             "key_kpis": [
-                "Trial-to-Paid Conversion Rate > 5%",
-                "User Onboarding Activation Rate > 45%",
-                "CAC Payback Period < 3 Months",
-                "Net Revenue Retention > 105%"
+                "Sign-up conversion rate > 15%",
+                "Paid upgrade rate > 5%",
+                "Monthly churn < 3%",
+                "CAC payback under 60 days"
             ],
             "how_to_get_started": [
-                "1. Build a high-converting landing page with an interactive demo sandbox.",
-                "2. Conduct 15 structured problem interviews with target decision makers.",
-                "3. Launch a private waitlist via niche industry forums and LinkedIn groups.",
-                "4. Ship the 3 Must-Have MVP features within a 4-week development sprint.",
-                "5. Onboard the first 20 beta users with direct personal concierge support."
+                "1. Create simple 1-page landing page.",
+                "2. Message 20 target users for feedback.",
+                "3. Build 3 core Must-Have features.",
+                "4. Launch closed beta to waitlist.",
+                "5. Share launch on Product Hunt."
             ]
         }}
         """
 
-        system_instruction = "You are a growth marketing executive and venture builder. Deliver tactical, highly specific, and battle-tested Go-To-Market playbooks."
+        system_instruction = "You write in short, simple words. Formulate clear, concise Go-To-Market roadmaps and playbooks in Indian Rupees (₹). Zero fluff."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)
@@ -186,7 +185,7 @@ class GtmAgent:
                 GtmChannel(
                     channel_name="Product-Led Organic Search & Content",
                     description=f"Publish high-intent workflow guides and solution comparisons targeting {ind} keywords.",
-                    expected_cac="Low ($10 - $25)",
+                    expected_cac="Low (₹800 - ₹2,000)",
                     conversion_strategy="Free interactive sandbox preview requiring zero sign-in to test."
                 ),
                 GtmChannel(
@@ -198,7 +197,7 @@ class GtmAgent:
                 GtmChannel(
                     channel_name="High-Intent Paid Search & Social Retargeting",
                     description="Run targeted Google Search and LinkedIn ads against competitor brand keywords.",
-                    expected_cac="Moderate ($45 - $85)",
+                    expected_cac="Moderate (₹3,500 - ₹6,500)",
                     conversion_strategy="Direct landing page offering free trial with instant value demonstration."
                 )
             ],
@@ -231,14 +230,14 @@ class GtmAgent:
                         "Activate paid search and targeted partner integration listings.",
                         "Roll out self-service paid tiers with introductory annual discount incentives."
                     ],
-                    goals="Reach first $5,000 Monthly Recurring Revenue with under 90-day payback period."
+                    goals="Reach first ₹4,00,000 Monthly Recurring Revenue with under 90-day payback period."
                 )
             ],
             pricing_strategy="Value-aligned recurring subscription featuring a generous free tier to foster virality, converting power users through workflow caps and team features.",
             pricing_tiers=[
                 "Starter (Free): 5 free monthly evaluations and basic reporting.",
-                "Professional ($39/month): Unlimited reports, advanced export options, and custom presets.",
-                "Team / Organization ($149/month): 5 seats, collaborative workspaces, and API access."
+                "Professional (₹2,999/month): Unlimited reports, advanced export options, and custom presets.",
+                "Team / Organization (₹11,999/month): 5 seats, collaborative workspaces, and API access."
             ],
             key_kpis=[
                 "Trial-to-Paid Conversion Rate > 6.5%",
