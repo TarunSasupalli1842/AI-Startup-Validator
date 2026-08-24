@@ -127,13 +127,89 @@ function generateLocalAdvice(query, report) {
   }
 
   // TAM & Unit Economics
-  if (/tam|sam|som|market size|potential|opportunity|cac|ltv|economics/i.test(q)) {
+  if (/tam|sam|som|market size|potential|opportunity|cac|ltv|economics|cagr/i.test(q)) {
     return {
       reply: `**Market Opportunity & Unit Economics for ${name}:**\n\n- **Market Sizing**: TAM of **${opp.tam || 'Global Market'}**, SAM of **${opp.sam || 'Target Market'}**, and SOM target of **${opp.som || 'Target SOM'}**.\n- **Unit Economics**: Estimated CAC of **${opp.estimated_cac || 'Moderate'}** vs LTV of **${opp.estimated_ltv || 'High'}**.\n- **Assessment**: ${opp.unit_economics_summary || 'Strong recurring margins.'}`,
       suggested_followups: [
         "How do I lower my CAC?",
         "What is my ideal pricing model?",
         "How can I get my first 100 users?"
+      ]
+    };
+  }
+
+  // ICP & Customer Personas
+  if (/persona|segment|audience|target|demographic|icp|who|profile|ideal customer/i.test(q)) {
+    const primary = segs.primary_segment || {};
+    const pName = primary.persona_name || `Primary ${aud}`;
+    const pain = primary.key_pain_points?.[0] || prob;
+    const wtp = primary.willingness_to_pay || 'High willingness to pay for ROI';
+    return {
+      reply: `**Ideal Customer Profile (ICP) for ${name}:**\n\n- **Target Persona**: **${pName}** in ${ind}.\n- **Core Pain Trigger**: ${pain}.\n- **Willingness to Pay**: ${wtp}.`,
+      suggested_followups: [
+        "How can I reach this persona directly?",
+        "What is my ideal pricing model?",
+        "What should I build first in my MVP?"
+      ]
+    };
+  }
+
+  // SWOT Highlights
+  if (/swot|strength|weakness|opportunit/i.test(q)) {
+    const strengths = (swot.strengths || [`Tailored solution for ${aud}`]).slice(0, 2);
+    const weaknesses = (swot.weaknesses || ['Early brand recognition']).slice(0, 2);
+    const opps = (swot.opportunities || ['Expanding digital adoption']).slice(0, 2);
+    return {
+      reply: `**SWOT Highlights for ${name}:**\n\n- **Strengths**: ${strengths.join(', ')}.\n- **Weaknesses**: ${weaknesses.join(', ')}.\n- **Top Opportunity**: ${opps.join(', ')}.`,
+      suggested_followups: [
+        "How do I overcome my biggest weaknesses?",
+        "What is my defensible competitive moat?",
+        "What should I build first in my MVP?"
+      ]
+    };
+  }
+
+  // Launch Execution & Next Steps
+  if (/launch|start|step|action|roadmap|plan|execute|begin|checklist|phase/i.test(q)) {
+    const phases = gtm.launch_strategy || [];
+    const steps = gtm.how_to_get_started || [];
+    const phase1 = phases[0]?.phase_name || 'Phase 1: Pre-launch validation';
+    const stepItems = steps.length > 0 ? steps.slice(0, 2).map((s, i) => `- **Step ${i+1}**: ${s}`).join('\n') : `- **Validate**: Interview 15 target users in ${aud}.\n- **Prototype**: Build the core 1-click workflow.`;
+    return {
+      reply: `**Immediate Launch Execution Plan for ${name}:**\n\n- **Current Sprint**: **${phase1}**.\n${stepItems}\n- **Goal**: Lock in 5 committed beta pilot customers within 30 days.`,
+      suggested_followups: [
+        "How can I get my first 100 paying customers?",
+        "What should I build first in my MVP?",
+        "What is my ideal pricing model?"
+      ]
+    };
+  }
+
+  // Pitching & Investors
+  if (/pitch|investor|fundrais|angel|vc|raise|valuation|deck/i.test(q)) {
+    const tam = opp.tam || 'Market';
+    const moat = comps.unique_moat || 'Proprietary workflow';
+    return {
+      reply: `**Investor Pitch Narrative for ${name} (${overallScore}% Score):**\n\n- **The Hook**: ${aud} are bleeding time on *${prob.slice(0, 60)}*.\n- **The Engine**: ${name} delivers *${sol.slice(0, 60)}* with a moat in *${moat.slice(0, 40)}*.\n- **Market Sizing**: Capitalizing on a **${tam}** sector opportunity.`,
+      suggested_followups: [
+        "What traction metrics do investors want to see?",
+        "What is my estimated CAC vs LTV?",
+        "Why is my startup risky?"
+      ]
+    };
+  }
+
+  // Feasibility Score & Verdict
+  if (/score|feasib|verdict|viability|rating|why/i.test(q)) {
+    const clarity = report?.validation_scores?.problem_clarity || 80;
+    const solScore = report?.validation_scores?.solution_strength || 80;
+    const mktScore = report?.validation_scores?.market_potential || 80;
+    return {
+      reply: `**Validation Score Breakdown for ${name}:**\n\n- **Overall Viability**: **${overallScore}%** (${verdict}).\n- **Key Pillars**: Problem Clarity (**${clarity}%**), Solution Strength (**${solScore}%**), Market Potential (**${mktScore}%**).\n- **Advisor Take**: Strong underlying thesis; execution speed is your primary differentiator.`,
+      suggested_followups: [
+        "What should I build first in my MVP?",
+        "How can I get my first 100 paying customers?",
+        "Why is my startup risky?"
       ]
     };
   }
