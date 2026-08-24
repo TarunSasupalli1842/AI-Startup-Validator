@@ -6,12 +6,14 @@ from config import settings
 
 logger = logging.getLogger(__name__)
 
-# Real, official Google Gemini model names supported by Generative Language API
+# Real, official Google Gemini model names prioritized by active API availability
 GEMINI_MODELS = [
-    "gemini-flash-latest",
-    "gemini-flash-lite-latest",
     "gemini-2.5-flash-lite",
-    "gemini-2.5-flash",
+    "gemini-3-flash-preview",
+    "gemini-3.1-flash-lite-preview",
+    "gemini-flash-lite-latest",
+    "gemma-4-26b-a4b-it",
+    "gemini-flash-latest",
     "gemini-pro-latest"
 ]
 
@@ -33,7 +35,7 @@ def clean_json_text(text: str) -> str:
 async def call_gemini(prompt: str, expect_json: bool = False, system_instruction: str = "") -> str:
     """
     Communicates with the Gemini API asynchronously using direct HTTP requests.
-    Enforces fast serverless execution and rapid fallback on quota exhaustion.
+    Cascades through active models and handles rapid fallback if all fail.
     """
     if not settings.is_gemini_configured:
         logger.warning("Gemini API key is not configured. Skipping LLM request.")
@@ -52,7 +54,7 @@ async def call_gemini(prompt: str, expect_json: bool = False, system_instruction
     payload = {
         "contents": contents,
         "generationConfig": {
-            "temperature": 0.2, # Low temperature for analytical validation
+            "temperature": 0.4, # Balanced temperature for dynamic conversational intelligence
             "maxOutputTokens": 4096
         }
     }
@@ -61,8 +63,7 @@ async def call_gemini(prompt: str, expect_json: bool = False, system_instruction
         payload["generationConfig"]["responseMimeType"] = "application/json"
         
     last_error = None
-    # Fast timeout to stay well within Vercel serverless function limits
-    timeout_config = httpx.Timeout(5.0, connect=2.0)
+    timeout_config = httpx.Timeout(25.0, connect=10.0)
 
     for model_name in GEMINI_MODELS:
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model_name}:generateContent?key={settings.GEMINI_API_KEY}"
@@ -79,14 +80,14 @@ async def call_gemini(prompt: str, expect_json: bool = False, system_instruction
                     except (KeyError, IndexError) as parse_err:
                         logger.error(f"Failed to parse Gemini API response JSON structure: {parse_err}. Raw: {data}")
                         raise ValueError("Failed to parse response structure from Gemini API.")
-                elif response.status_code in (429, 401, 403):
-                    # Quota exceeded or invalid key: abort immediately to avoid multi-model timeout lag
-                    last_error = f"Status {response.status_code}: {response.text[:100]}"
-                    logger.warning(f"Gemini API returned {response.status_code} ({last_error}). Fast-exiting to fallback engine.")
+                elif response.status_code == 401:
+                    # Invalid API key - abort immediately
+                    last_error = "Invalid Gemini API Key (401 Unauthorized)"
+                    logger.warning(f"Gemini API returned 401. Aborting key.")
                     break
                 else:
-                    last_error = f"Status {response.status_code}: {response.text[:100]}"
-                    logger.warning(f"Model {model_name} returned {response.status_code}. Trying next model...")
+                    last_error = f"Model {model_name} status {response.status_code}: {response.text[:100]}"
+                    logger.info(f"Model {model_name} returned {response.status_code}. Trying next model in cascade...")
         except httpx.RequestError as exc:
             last_error = str(exc)
             logger.warning(f"Connection error to {model_name}: {exc}")
@@ -94,5 +95,5 @@ async def call_gemini(prompt: str, expect_json: bool = False, system_instruction
             last_error = str(exc)
             logger.warning(f"Error calling {model_name}: {exc}")
 
-    raise ValueError(f"Gemini API request failed: {last_error}")
+    raise ValueError(f"All Gemini models exhausted: {last_error}")
 

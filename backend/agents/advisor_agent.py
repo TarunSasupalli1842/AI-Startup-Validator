@@ -33,6 +33,52 @@ def _safe_list_str(val: Any) -> List[str]:
             res.append(str(item))
     return res
 
+def extract_reply_and_followups(text: str) -> tuple:
+    """Robustly parses LLM JSON or clean Markdown output without leaking JSON artifacts."""
+    cleaned = text.strip()
+    if "```json" in cleaned:
+        cleaned = re.sub(r"^```json\s*", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+    elif "```" in cleaned and cleaned.startswith("```"):
+        cleaned = re.sub(r"^```\s*", "", cleaned)
+        cleaned = re.sub(r"\s*```$", "", cleaned)
+
+    try:
+        data = json.loads(cleaned)
+        if isinstance(data, dict):
+            reply = str(data.get("reply", "")).strip()
+            followups = data.get("suggested_followups", [])
+            if reply:
+                return reply, [str(f) for f in followups if f]
+    except Exception:
+        pass
+
+    # Regex extraction fallback for malformed JSON strings
+    reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*,\s*"suggested_followups"', text)
+    if not reply_match:
+        reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*\}', text)
+    
+    followups = []
+    followups_match = re.search(r'"suggested_followups"\s*:\s*\[([\s\S]*?)\]', text)
+    if followups_match:
+        items = re.findall(r'"([^"]+)"', followups_match.group(1))
+        followups = [it.strip() for it in items if it.strip()]
+
+    if reply_match:
+        raw_rep = reply_match.group(1)
+        try:
+            unescaped = raw_rep.encode('utf-8').decode('unicode_escape')
+            return unescaped.strip(), followups
+        except Exception:
+            return raw_rep.replace(r'\n', '\n').replace(r'\"', '"').strip(), followups
+
+    clean_text = text.strip()
+    if clean_text.startswith("{") and '"reply"' in clean_text:
+        clean_text = re.sub(r'^\s*\{\s*"reply"\s*:\s*"?', '', clean_text)
+        clean_text = re.sub(r'"?\s*,\s*"suggested_followups"[\s\S]*$', '', clean_text)
+        clean_text = clean_text.replace(r'\n', '\n').replace(r'\"', '"').strip()
+    return clean_text, followups
+
 class AdvisorAgent:
     def __init__(self):
         self.name = "Startup Advisor Agent"
@@ -144,50 +190,41 @@ class AdvisorAgent:
         ])
 
         prompt = f"""
-        You are an elite, high-signal AI Startup Advisor and Venture Partner.
-        Answer the founder's question directly using their validation dossier as context.
-
-        [VALIDATION DOSSIER]
+        You are an elite, world-class AI Startup Co-founder, Technical Advisor, and Venture Partner dedicated to "{startup_name}".
+        
+        [STARTUP DOSSIER & CONTEXT]
         {context_text}
 
-        [RECENT CONVERSATION HISTORY]
+        [CONVERSATION HISTORY]
         {history_formatted or "None (start of conversation)"}
 
-        [FOUNDER QUESTION]
+        [FOUNDER QUESTION / REQUEST]
         "{user_msg}"
 
-        CRITICAL CONCISENESS RULES:
-        1. Keep your reply VERY CONCISE, punchy, and actionable (under 75 words total).
-        2. NO greetings, filler phrases, or long disclaimers.
-        3. Start with 1 direct, high-impact sentence.
-        4. Follow with 2 to 3 short bullet points with key takeaways bolded.
-        5. Tailor strictly to {startup_name} and {target_audience}. Use Indian Rupees (₹) for currency if relevant.
-        6. Provide 3 short relevant follow-up questions.
+        ADVISORY & INTELLIGENCE GUIDELINES:
+        1. ACT AS A TRUE DEDICATED LLM CO-FOUNDER: Answer ANY question the founder asks—whether it's strategic advice, code snippets, cold emails, marketing taglines, equity/cap-table logic, competitive teardowns, user interview scripts, pitch deck slides, or technical architecture.
+        2. CONTEXT GROUNDING: Deeply incorporate the specific realities of {startup_name} (target audience: {target_audience}, core problem, solution, unit economics, and competitive moat).
+        3. CODE & ARTIFACTS: If the user asks for code, scripts, templates, emails, or outlines, provide COMPLETE, production-ready markdown code blocks (e.g. ```python, ```javascript, ```bash) or structured copy rather than generic placeholders.
+        4. STRUCTURE & FORMATTING: Use clean, polished markdown with bold key takeaways, concise bullet points, and high-impact framing. Avoid repetitive filler or generic fluff.
+        5. CURRENCY: Default to Indian Rupees (₹) for pricing and financial metrics when relevant, or USD ($) if global SaaS is discussed.
+        6. SUGGESTED NEXT STEPS: Provide 3 sharp, highly contextual follow-up questions tailored specifically to the conversation.
 
-        Return strictly a JSON object matching this schema:
+        Return strictly a valid JSON object matching this schema:
         {{
-            "reply": "Concise, punchy markdown response (1 short lead sentence + 2-3 short bullets, under 75 words).",
+            "reply": "Your comprehensive, high-signal markdown response (with code blocks, bullet points, or structured guidance as requested).",
             "suggested_followups": [
-                "Short follow-up 1",
-                "Short follow-up 2",
-                "Short follow-up 3"
+                "Sharp follow-up question 1",
+                "Sharp follow-up question 2",
+                "Sharp follow-up question 3"
             ]
         }}
         """
 
-        system_instruction = "You are a concise, high-signal startup advisor. Provide short, punchy, direct advice (under 75 words) using 2-3 clean bullet points with bold key points. Zero fluff."
+        system_instruction = "You are a world-class startup co-founder and technical advisor LLM. Provide deep, actionable, high-signal responses with production-ready code, persuasive copy, or sharp strategic frameworks tailored to the startup dossier."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)
-            
-            # Robust JSON extraction
-            try:
-                parsed_data = json.loads(response_text)
-                reply = parsed_data.get("reply", "").strip()
-                followups = parsed_data.get("suggested_followups", []) or DEFAULT_SUGGESTIONS[:3]
-            except Exception:
-                reply = response_text.strip()
-                followups = DEFAULT_SUGGESTIONS[:3]
+            reply, followups = extract_reply_and_followups(response_text)
 
             if not reply:
                 raise ValueError("Empty reply from LLM")
@@ -195,7 +232,7 @@ class AdvisorAgent:
             logger.info(f"[{self.name}] response generated successfully via LLM.")
             return AdvisorChatResponse(
                 reply=reply,
-                suggested_followups=followups[:3],
+                suggested_followups=(followups[:3] if followups else DEFAULT_SUGGESTIONS[:3]),
                 confidence="High"
             )
         except Exception as e:
