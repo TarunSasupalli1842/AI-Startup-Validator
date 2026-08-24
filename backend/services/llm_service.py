@@ -18,18 +18,24 @@ GEMINI_MODELS = [
 ]
 
 def clean_json_text(text: str) -> str:
-    """Strips Markdown code block fences and extracts JSON substring from LLM output."""
+    """Strips outer Markdown code block fences and extracts valid JSON substring."""
     cleaned = text.strip()
-    # If wrapped in markdown code blocks e.g. ```json ... ```
-    if "```" in cleaned:
-        match = re.search(r"```(?:json)?\s*([\s\S]*?)\s*```", cleaned, re.IGNORECASE)
-        if match:
-            cleaned = match.group(1).strip()
-    # Extract first valid JSON object or array if extra text exists
+    # Only strip outer code fences if the whole string starts and ends with ```
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?\s*\n?", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\n?\s*```$", "", cleaned)
+        cleaned = cleaned.strip()
+
+    # Extract outer-most JSON object from first '{' to last '}' if valid
     first_brace = cleaned.find("{")
     last_brace = cleaned.rfind("}")
     if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-        cleaned = cleaned[first_brace:last_brace + 1]
+        candidate = cleaned[first_brace:last_brace + 1]
+        try:
+            json.loads(candidate, strict=False)
+            return candidate
+        except Exception:
+            pass
     return cleaned
 
 async def call_gemini(prompt: str, expect_json: bool = False, system_instruction: str = "") -> str:

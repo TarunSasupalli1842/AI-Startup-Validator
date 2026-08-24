@@ -34,26 +34,42 @@ def _safe_list_str(val: Any) -> List[str]:
     return res
 
 def extract_reply_and_followups(text: str) -> tuple:
-    """Robustly parses LLM JSON or clean Markdown output without leaking JSON artifacts."""
+    """Robustly parses LLM JSON or clean Markdown output without leaking JSON artifacts or escaped newlines."""
     cleaned = text.strip()
-    if "```json" in cleaned:
-        cleaned = re.sub(r"^```json\s*", "", cleaned, flags=re.IGNORECASE)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
-    elif "```" in cleaned and cleaned.startswith("```"):
-        cleaned = re.sub(r"^```\s*", "", cleaned)
-        cleaned = re.sub(r"\s*```$", "", cleaned)
+    if cleaned.startswith("```"):
+        cleaned = re.sub(r"^```(?:json)?\s*\n?", "", cleaned, flags=re.IGNORECASE)
+        cleaned = re.sub(r"\n?\s*```$", "", cleaned)
+        cleaned = cleaned.strip()
 
+    # 1. Try standard JSON load with strict=False
     try:
-        data = json.loads(cleaned)
+        data = json.loads(cleaned, strict=False)
         if isinstance(data, dict):
             reply = str(data.get("reply", "")).strip()
             followups = data.get("suggested_followups", [])
             if reply:
+                reply = reply.replace('\\n', '\n').replace('\\"', '"')
                 return reply, [str(f) for f in followups if f]
     except Exception:
         pass
 
-    # Regex extraction fallback for malformed JSON strings
+    # 2. Extract outer-most JSON object from first '{' to last '}'
+    first_brace = cleaned.find("{")
+    last_brace = cleaned.rfind("}")
+    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+        candidate = cleaned[first_brace:last_brace + 1]
+        try:
+            data = json.loads(candidate, strict=False)
+            if isinstance(data, dict):
+                reply = str(data.get("reply", "")).strip()
+                followups = data.get("suggested_followups", [])
+                if reply:
+                    reply = reply.replace('\\n', '\n').replace('\\"', '"')
+                    return reply, [str(f) for f in followups if f]
+        except Exception:
+            pass
+
+    # 3. Regex extraction fallback for malformed JSON strings
     reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*,\s*"suggested_followups"', text)
     if not reply_match:
         reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*\}', text)
@@ -68,15 +84,16 @@ def extract_reply_and_followups(text: str) -> tuple:
         raw_rep = reply_match.group(1)
         try:
             unescaped = raw_rep.encode('utf-8').decode('unicode_escape')
-            return unescaped.strip(), followups
+            return unescaped.replace('\\n', '\n').replace('\\"', '"').strip(), followups
         except Exception:
             return raw_rep.replace(r'\n', '\n').replace(r'\"', '"').strip(), followups
 
+    # 4. Clean fallback text
     clean_text = text.strip()
     if clean_text.startswith("{") and '"reply"' in clean_text:
         clean_text = re.sub(r'^\s*\{\s*"reply"\s*:\s*"?', '', clean_text)
         clean_text = re.sub(r'"?\s*,\s*"suggested_followups"[\s\S]*$', '', clean_text)
-        clean_text = clean_text.replace(r'\n', '\n').replace(r'\"', '"').strip()
+    clean_text = clean_text.replace('\\n', '\n').replace('\\"', '"').strip()
     return clean_text, followups
 
 class AdvisorAgent:

@@ -459,15 +459,31 @@ export default function StartupAdvisor({ report, isCompact = false }) {
   };
 
   const renderFormattedContent = (content) => {
+    // 1. Normalize literal \n or escaped characters into real newlines
+    let textToRender = (content || '')
+      .replace(/\\n/g, '\n')
+      .replace(/\\"/g, '"')
+      .replace(/\\t/g, '  ');
+
+    // 2. If the text itself looks like raw JSON with "reply": "...", extract it cleanly
+    if (textToRender.trim().startsWith('{') && textToRender.includes('"reply"')) {
+      try {
+        const parsed = JSON.parse(textToRender);
+        if (parsed.reply) {
+          textToRender = String(parsed.reply).replace(/\\n/g, '\n');
+        }
+      } catch (_) {}
+    }
+
     // Process markdown code blocks ```lang ... ``` first
     const parts = [];
-    const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
+    const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
     let lastIndex = 0;
     let match;
 
-    while ((match = codeBlockRegex.exec(content)) !== null) {
+    while ((match = codeBlockRegex.exec(textToRender)) !== null) {
       if (match.index > lastIndex) {
-        parts.push({ type: 'text', text: content.substring(lastIndex, match.index) });
+        parts.push({ type: 'text', text: textToRender.substring(lastIndex, match.index) });
       }
       parts.push({
         type: 'code',
@@ -476,8 +492,8 @@ export default function StartupAdvisor({ report, isCompact = false }) {
       });
       lastIndex = match.index + match[0].length;
     }
-    if (lastIndex < content.length) {
-      parts.push({ type: 'text', text: content.substring(lastIndex) });
+    if (lastIndex < textToRender.length) {
+      parts.push({ type: 'text', text: textToRender.substring(lastIndex) });
     }
 
     return (
