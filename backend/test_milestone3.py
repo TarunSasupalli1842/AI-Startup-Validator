@@ -2,6 +2,9 @@ import asyncio
 import sys
 import os
 
+# Ensure backend directory is in sys.path
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
 # Set stdout to UTF-8
 if sys.platform == "win32":
     sys.stdout.reconfigure(encoding="utf-8")

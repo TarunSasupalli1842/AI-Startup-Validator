@@ -46,7 +46,22 @@ const formatInr = (val, fallback = '') => {
 export default function ValidationReport() {
   const location = useLocation();
   const navigate = useNavigate();
-  const report = location.state?.report;
+  const report = location.state?.report || (() => {
+    try {
+      const saved = sessionStorage.getItem('valistart_active_report');
+      if (saved) return JSON.parse(saved);
+    } catch (_) {}
+    return null;
+  })();
+
+  // Keep sessionStorage in sync if opened via navigation state
+  useEffect(() => {
+    if (location.state?.report) {
+      try {
+        sessionStorage.setItem('valistart_active_report', JSON.stringify(location.state.report));
+      } catch (_) {}
+    }
+  }, [location.state?.report]);
 
   const [activeTab, setActiveTab] = useState('overview');
   const [copied, setCopied] = useState(false);

@@ -102,6 +102,10 @@ export default function Home() {
     setLoading(true);
     try {
       const result = await validateStartupIdea(formData);
+      // Persist report for session recovery
+      try {
+        sessionStorage.setItem('valistart_active_report', JSON.stringify(result));
+      } catch (_) {}
       // Pass report data to report view page
       navigate('/report', { state: { report: result } });
     } catch (err) {
