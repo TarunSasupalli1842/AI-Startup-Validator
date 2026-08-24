@@ -111,13 +111,13 @@ function generateLocalAdvice(query, report) {
 
   // Competitors & Moat
   if (/competitor|rival|alternative|moat|advantage|differentiate|defensib|vs/i.test(q)) {
-    const directComps = comps.direct_competitors || [];
+    const directComps = comps.competitors || comps.direct_competitors || [];
     const moat = comps.unique_moat || `Tailored workflows and faster time-to-value for ${aud}.`;
     const compStr = directComps.length > 0 
       ? directComps.slice(0, 2).map(c => `- **${c.name}**: ${c.weaknesses?.[0] || 'Legacy interface'} *(Your advantage: ${c.competitive_advantage || 'Faster setup'})*`).join('\n')
       : `- **Legacy Alternatives**: Bulky, expensive tools with slow setup.\n- **Manual Workarounds**: Low cost but highly inefficient.`;
     return {
-      reply: `**Competitive Landscape & Moat for ${name}:**\n\n${compStr}\n- **Defensible Moat**: ${moat}.`,
+      reply: `**Competitive Landscape & Moat for ${name}:**\n\n${compStr}\n- **Defensible Moat**: ${moat}`,
       suggested_followups: [
         "How do I convince customers to switch from competitors?",
         "What is my ideal pricing model?",
@@ -156,15 +156,15 @@ export default function StartupAdvisor({ report, isCompact = false }) {
   const overallScore = report?.validation_scores?.overall_score || 0;
   const storageKey = `valistart_advisor_chat_${report?.extracted_idea?.startup_name || 'default'}`;
 
-  const initialWelcome = {
+  const createInitialWelcome = (name, score) => ({
     role: 'assistant',
-    content: `👋 Hi! I'm your **AI Startup Advisor** for **${startupName}** (${overallScore}% Viability Score).\n\nAsk me any specific question about your MVP roadmap, go-to-market plan, pricing, defensible moat, or risk mitigations!`,
+    content: `👋 Hi! I'm your **AI Startup Advisor** for **${name}** (${score}% Viability Score).\n\nAsk me any specific question about your MVP roadmap, go-to-market plan, pricing, defensible moat, or risk mitigations!`,
     suggestedFollowups: [
       "What should I build first in my MVP?",
       "Why is my startup risky and how do I fix it?",
       "How can I get my first 100 paying customers?"
     ]
-  };
+  });
 
   const [messages, setMessages] = useState(() => {
     try {
@@ -174,8 +174,26 @@ export default function StartupAdvisor({ report, isCompact = false }) {
         if (Array.isArray(parsed) && parsed.length > 0) return parsed;
       }
     } catch (_) {}
-    return [initialWelcome];
+    return [createInitialWelcome(startupName, overallScore)];
   });
+
+  // Switch chat conversation when a new startup report is loaded
+  useEffect(() => {
+    const currentKey = `valistart_advisor_chat_${report?.extracted_idea?.startup_name || 'default'}`;
+    const curName = report?.extracted_idea?.startup_name || 'your startup';
+    const curScore = report?.validation_scores?.overall_score || 0;
+    try {
+      const saved = sessionStorage.getItem(currentKey);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          setMessages(parsed);
+          return;
+        }
+      }
+    } catch (_) {}
+    setMessages([createInitialWelcome(curName, curScore)]);
+  }, [report?.extracted_idea?.startup_name, report?.validation_scores?.overall_score]);
 
   const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);

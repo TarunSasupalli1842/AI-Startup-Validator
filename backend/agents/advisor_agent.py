@@ -271,7 +271,7 @@ class AdvisorAgent:
 
         # 5. Competitors, Alternatives, Moat, Differentiation
         elif any(k in msg_lower for k in ["competitor", "rival", "alternative", "moat", "advantage", "differentiate", "defensib", "compare", "vs", "market share", "replace"]):
-            comp_list = comps.get("direct_competitors", [])
+            comp_list = comps.get("competitors", []) or comps.get("direct_competitors", [])
             moat = comps.get("unique_moat", f"Hyper-tailored workflows and faster time-to-value for {aud}.")
             if comp_list:
                 comp_items = [f"- **{c.get('name', 'Competitor')}**: {c.get('weaknesses', ['Legacy architecture', 'High cost'])[0]} *(Your edge: {c.get('competitive_advantage', 'Instant setup')})*" for c in comp_list[:2]]
