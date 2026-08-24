@@ -17,12 +17,13 @@ const DEFAULT_QUESTIONS = [
  * Intelligent client-side fallback advisor engine in case of network glitches.
  */
 function generateLocalAdvice(query, report) {
-  const q = query.toLowerCase().trim();
-  const name = report?.extracted_idea?.startup_name || 'your startup';
-  const aud = report?.extracted_idea?.target_audience || 'your target customers';
-  const ind = report?.extracted_idea?.industry || 'your industry';
-  const prob = report?.extracted_idea?.core_problem || 'the core user problem';
-  const sol = report?.extracted_idea?.core_solution || 'your product solution';
+  const q = (query || '').toLowerCase().trim();
+  const idea = report?.extracted_idea || {};
+  const name = idea.startup_name || 'your startup';
+  const aud = idea.target_audience || 'your target customers';
+  const ind = idea.industry || 'your industry';
+  const prob = idea.core_problem || 'the core user problem';
+  const sol = idea.core_solution || 'your product solution';
   const overallScore = report?.validation_scores?.overall_score || 78;
   const verdict = report?.summary?.feasibility_verdict || 'Viable Venture';
 
@@ -36,15 +37,20 @@ function generateLocalAdvice(query, report) {
 
   // 1. User Acquisition, First 100 Users, Marketing
   if (/100|acquire|acquisition|marketing|growth|channel|traffic|customer|reach|funnel|get user|find customer|early user|users/i.test(q)) {
-    const channels = gtm.acquisition_channels || [];
+    const channels = Array.isArray(gtm.acquisition_channels) ? gtm.acquisition_channels : [];
     let channelsStr = '';
     if (channels.length > 0) {
-      channelsStr = channels.slice(0, 2).map(c => `- **${c.channel_name || 'Channel'}**: ${c.description || ''} *(Target: ${c.expected_cac || 'Low CAC'})*`).join('\n');
+      channelsStr = channels.slice(0, 2).map(c => {
+        const cName = typeof c === 'object' ? (c.channel_name || 'Channel') : String(c);
+        const cDesc = typeof c === 'object' ? (c.description || '') : 'Direct outreach and targeted community.';
+        const cCac = typeof c === 'object' ? (c.expected_cac || 'Low CAC') : 'Low CAC';
+        return `- **${cName}**: ${cDesc} *(Target: ${cCac})*`;
+      }).join('\n');
     } else {
-      channelsStr = `- **Founder Direct Outreach**: Message 25 decision-makers in ${aud} daily.\n- **Niche Community Teardowns**: Share actionable insights in targeted industry groups.`;
+      channelsStr = `- **Founder Direct Outreach**: Message 25 decision-makers in ${aud} daily with personalized video audits.\n- **Niche Community Seeding**: Share valuable workflow teardowns in targeted industry hubs.`;
     }
     return {
-      reply: `**Fastest path to 100 paying customers for ${name}:**\n\n${channelsStr}\n- **Playbook**: Offer white-glove onboarding to your first 20 users in exchange for video case studies.`,
+      reply: `**Fastest path to 100 paying customers for ${name}:**\n\n${channelsStr}\n- **Playbook**: Offer white-glove onboarding to your first 20 beta users in exchange for case studies and referrals.`,
       suggested_followups: [
         "What is my ideal pricing model?",
         "What is my estimated CAC vs LTV?",
@@ -54,17 +60,21 @@ function generateLocalAdvice(query, report) {
   }
 
   // 2. MVP & Build scope
-  if (/build|mvp|feature|moscow|scope|timeline|tech|stack|prototype/i.test(q)) {
-    const mustHaves = mvp.must_have || [];
+  if (/build|mvp|feature|moscow|scope|timeline|tech|stack|prototype|version/i.test(q)) {
+    const mustHaves = Array.isArray(mvp.must_have) ? mvp.must_have : [];
     const timeline = mvp.target_timeline_weeks || '4-6 Weeks';
     let featuresStr = '';
     if (mustHaves.length > 0) {
-      featuresStr = mustHaves.slice(0, 2).map(f => `- **${f.feature_name || 'Feature'}**: ${f.description || 'Core workflow'}`).join('\n');
+      featuresStr = mustHaves.slice(0, 2).map(f => {
+        const fName = typeof f === 'object' ? (f.feature_name || 'Core Feature') : String(f);
+        const fDesc = typeof f === 'object' ? (f.description || 'Core workflow automation') : 'Core workflow';
+        return `- **${fName}**: ${fDesc}`;
+      }).join('\n');
     } else {
       featuresStr = `- **Core Automation Engine**: Direct solution for ${prob.slice(0, 50)}.\n- **Frictionless UI**: Instant self-service workflow for ${aud}.`;
     }
     return {
-      reply: `**Focus strictly on the Must-Have workflow (${timeline} build):**\n\n${featuresStr}\n- **Golden Rule**: Deliver value in <60 seconds; validate with 10 beta users before adding more features.`,
+      reply: `**Focus strictly on the Must-Have workflow (${timeline} build sprint):**\n\n${featuresStr}\n- **Golden Rule**: Deliver value in <60 seconds; validate with 10 beta users before writing additional features.`,
       suggested_followups: [
         "What features should I defer to Phase 2?",
         "How can I get my first 100 users?",
@@ -75,15 +85,22 @@ function generateLocalAdvice(query, report) {
 
   // 3. Risk & Mitigation
   if (/risk|risky|threat|fail|danger|pitfall|regulation|mitigat|challenge/i.test(q)) {
-    const riskList = risks.risks || [];
+    const riskList = Array.isArray(risks.risks) ? risks.risks : [];
     const riskLevel = risks.overall_risk_level || 'Moderate';
     let riskStr = '';
     if (riskList.length > 0) {
-      riskStr = riskList.slice(0, 2).map(r => `- **${r.category || 'Risk'}**: ${r.risk || ''} *(Mitigation: ${r.mitigation || 'Validate early'})*`).join('\n');
+      riskStr = riskList.slice(0, 2).map(r => {
+        const cat = typeof r === 'object' ? (r.category || 'Risk') : 'Risk';
+        const desc = typeof r === 'object' ? (r.risk || '') : String(r);
+        const fix = typeof r === 'object' ? (r.mitigation || 'Validate early') : 'Validate early';
+        return `- **${cat}**: ${desc} *(Mitigation: ${fix})*`;
+      }).join('\n');
     } else {
-      riskStr = `- **Adoption Friction**: Inertia moving ${aud} off legacy habits.\n- **Moat Protection**: Need fast execution against competitors.`;
+      riskStr = `- **Adoption Friction**: Inertia moving ${aud} off legacy manual habits.\n- **Moat Protection**: Need fast execution against fast followers.`;
     }
-    const topMitigation = risks.key_mitigation_priorities?.[0] || 'Secure 5 pre-launch beta commitments';
+    const topMitigation = (Array.isArray(risks.key_mitigation_priorities) && risks.key_mitigation_priorities.length > 0) 
+      ? risks.key_mitigation_priorities[0] 
+      : 'Secure 5 pre-launch beta commitments';
     return {
       reply: `**Top risk factors for ${name} (${riskLevel} Risk Tier):**\n\n${riskStr}\n- **Top Priority**: ${topMitigation}.`,
       suggested_followups: [
@@ -94,11 +111,13 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // Pricing & Monetization
-  if (/price|pricing|monetiz|charge|cost|fee|revenue|tier|subscription|pay/i.test(q)) {
-    const tiers = gtm.pricing_tiers || [];
+  // 4. Pricing & Monetization
+  if (/price|pricing|monetiz|charge|cost|fee|revenue|tier|subscription|pay|freemium|dollar|rupee/i.test(q)) {
+    const tiers = Array.isArray(gtm.pricing_tiers) ? gtm.pricing_tiers : [];
     const pricingStrategy = gtm.pricing_strategy || `Value-aligned subscription for ${aud}.`;
-    const tiersStr = tiers.length > 0 ? tiers.slice(0, 2).map(t => `- **${t}**`).join('\n') : `- **Starter Tier**: Core workflow access.\n- **Pro Tier**: Advanced automation and team features.`;
+    const tiersStr = tiers.length > 0 
+      ? tiers.slice(0, 2).map(t => `- **${String(t)}**`).join('\n') 
+      : `- **Starter Tier**: Core workflow access.\n- **Pro Tier**: Advanced automation and team integrations.`;
     return {
       reply: `**Pricing & Monetization Strategy for ${name}:**\n\n${tiersStr}\n- **Strategy**: ${pricingStrategy}\n- **Action**: Charge early beta users an upfront annual discounted plan to confirm real budget.`,
       suggested_followups: [
@@ -109,13 +128,24 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // Competitors & Moat
-  if (/competitor|rival|alternative|moat|advantage|differentiate|defensib|vs/i.test(q)) {
-    const directComps = comps.competitors || comps.direct_competitors || [];
+  // 5. Competitors & Moat
+  if (/competitor|rival|alternative|moat|advantage|differentiate|defensib|compare|vs|replace/i.test(q)) {
+    const compList = Array.isArray(comps.competitors) ? comps.competitors : (Array.isArray(comps.direct_competitors) ? comps.direct_competitors : []);
     const moat = comps.unique_moat || `Tailored workflows and faster time-to-value for ${aud}.`;
-    const compStr = directComps.length > 0 
-      ? directComps.slice(0, 2).map(c => `- **${c.name}**: ${c.weaknesses?.[0] || 'Legacy interface'} *(Your advantage: ${c.competitive_advantage || 'Faster setup'})*`).join('\n')
-      : `- **Legacy Alternatives**: Bulky, expensive tools with slow setup.\n- **Manual Workarounds**: Low cost but highly inefficient.`;
+    let compStr = '';
+    if (compList.length > 0) {
+      compStr = compList.slice(0, 2).map(c => {
+        if (typeof c === 'object') {
+          const cName = c.name || 'Competitor';
+          const cWeak = (Array.isArray(c.weaknesses) && c.weaknesses.length > 0) ? c.weaknesses[0] : 'Legacy interface & high cost';
+          const cAdv = c.competitive_advantage || 'Faster setup';
+          return `- **${cName}**: ${cWeak} *(Your advantage: ${cAdv})*`;
+        }
+        return `- **${String(c)}**: Legacy architecture *(Your edge: Faster setup)*`;
+      }).join('\n');
+    } else {
+      compStr = `- **Legacy Alternatives**: Bulky, expensive tools with slow onboarding.\n- **Manual Spreadsheets**: Low cost but error-prone and unscalable.`;
+    }
     return {
       reply: `**Competitive Landscape & Moat for ${name}:**\n\n${compStr}\n- **Defensible Moat**: ${moat}`,
       suggested_followups: [
@@ -126,10 +156,10 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // TAM & Unit Economics
-  if (/tam|sam|som|market size|potential|opportunity|cac|ltv|economics|cagr/i.test(q)) {
+  // 6. TAM & Unit Economics
+  if (/tam|sam|som|market size|potential|opportunity|cac|ltv|economics|cagr|growth/i.test(q)) {
     return {
-      reply: `**Market Opportunity & Unit Economics for ${name}:**\n\n- **Market Sizing**: TAM of **${opp.tam || 'Global Market'}**, SAM of **${opp.sam || 'Target Market'}**, and SOM target of **${opp.som || 'Target SOM'}**.\n- **Unit Economics**: Estimated CAC of **${opp.estimated_cac || 'Moderate'}** vs LTV of **${opp.estimated_ltv || 'High'}**.\n- **Assessment**: ${opp.unit_economics_summary || 'Strong recurring margins.'}`,
+      reply: `**Market Opportunity & Unit Economics for ${name}:**\n\n- **Market Sizing**: TAM of **${opp.tam || 'Global Market'}**, SAM of **${opp.sam || 'Target Market'}**, and SOM target of **${opp.som || 'Target SOM'}**.\n- **Unit Economics**: Estimated CAC of **${opp.estimated_cac || 'Moderate'}** vs LTV of **${opp.estimated_ltv || 'High'}**.\n- **Assessment**: ${opp.unit_economics_summary || 'Strong recurring unit economics.'}`,
       suggested_followups: [
         "How do I lower my CAC?",
         "What is my ideal pricing model?",
@@ -138,12 +168,12 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // ICP & Customer Personas
+  // 7. ICP & Customer Personas
   if (/persona|segment|audience|target|demographic|icp|who|profile|ideal customer/i.test(q)) {
-    const primary = segs.primary_segment || {};
+    const primary = (typeof segs.primary_segment === 'object') ? segs.primary_segment : {};
     const pName = primary.persona_name || `Primary ${aud}`;
-    const pain = primary.key_pain_points?.[0] || prob;
-    const wtp = primary.willingness_to_pay || 'High willingness to pay for ROI';
+    const pain = (Array.isArray(primary.key_pain_points) && primary.key_pain_points.length > 0) ? primary.key_pain_points[0] : prob;
+    const wtp = primary.willingness_to_pay || 'High willingness to pay for proven ROI';
     return {
       reply: `**Ideal Customer Profile (ICP) for ${name}:**\n\n- **Target Persona**: **${pName}** in ${ind}.\n- **Core Pain Trigger**: ${pain}.\n- **Willingness to Pay**: ${wtp}.`,
       suggested_followups: [
@@ -154,11 +184,11 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // SWOT Highlights
+  // 8. SWOT Highlights
   if (/swot|strength|weakness|opportunit/i.test(q)) {
-    const strengths = (swot.strengths || [`Tailored solution for ${aud}`]).slice(0, 2);
-    const weaknesses = (swot.weaknesses || ['Early brand recognition']).slice(0, 2);
-    const opps = (swot.opportunities || ['Expanding digital adoption']).slice(0, 2);
+    const strengths = (Array.isArray(swot.strengths) && swot.strengths.length > 0 ? swot.strengths : [`Tailored solution for ${aud}`]).slice(0, 2);
+    const weaknesses = (Array.isArray(swot.weaknesses) && swot.weaknesses.length > 0 ? swot.weaknesses : ['Early brand recognition']).slice(0, 2);
+    const opps = (Array.isArray(swot.opportunities) && swot.opportunities.length > 0 ? swot.opportunities : ['Expanding digital adoption']).slice(0, 2);
     return {
       reply: `**SWOT Highlights for ${name}:**\n\n- **Strengths**: ${strengths.join(', ')}.\n- **Weaknesses**: ${weaknesses.join(', ')}.\n- **Top Opportunity**: ${opps.join(', ')}.`,
       suggested_followups: [
@@ -169,11 +199,11 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // Launch Execution & Next Steps
+  // 9. Launch Execution & Next Steps
   if (/launch|start|step|action|roadmap|plan|execute|begin|checklist|phase/i.test(q)) {
-    const phases = gtm.launch_strategy || [];
-    const steps = gtm.how_to_get_started || [];
-    const phase1 = phases[0]?.phase_name || 'Phase 1: Pre-launch validation';
+    const phases = Array.isArray(gtm.launch_strategy) ? gtm.launch_strategy : [];
+    const steps = Array.isArray(gtm.how_to_get_started) ? gtm.how_to_get_started : [];
+    const phase1 = (phases.length > 0 && typeof phases[0] === 'object') ? (phases[0].phase_name || 'Phase 1: Pre-launch validation') : 'Phase 1: Pre-launch validation';
     const stepItems = steps.length > 0 ? steps.slice(0, 2).map((s, i) => `- **Step ${i+1}**: ${s}`).join('\n') : `- **Validate**: Interview 15 target users in ${aud}.\n- **Prototype**: Build the core 1-click workflow.`;
     return {
       reply: `**Immediate Launch Execution Plan for ${name}:**\n\n- **Current Sprint**: **${phase1}**.\n${stepItems}\n- **Goal**: Lock in 5 committed beta pilot customers within 30 days.`,
@@ -185,12 +215,12 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // Pitching & Investors
-  if (/pitch|investor|fundrais|angel|vc|raise|valuation|deck/i.test(q)) {
-    const tam = opp.tam || 'Market';
+  // 10. Pitching & Investors
+  if (/pitch|investor|fundrais|angel|vc|raise|valuation|deck|capital/i.test(q)) {
+    const tam = opp.tam || 'Target Sector Market';
     const moat = comps.unique_moat || 'Proprietary workflow';
     return {
-      reply: `**Investor Pitch Narrative for ${name} (${overallScore}% Score):**\n\n- **The Hook**: ${aud} are bleeding time on *${prob.slice(0, 60)}*.\n- **The Engine**: ${name} delivers *${sol.slice(0, 60)}* with a moat in *${moat.slice(0, 40)}*.\n- **Market Sizing**: Capitalizing on a **${tam}** sector opportunity.`,
+      reply: `**Investor Pitch Narrative for ${name} (${overallScore}% Score):**\n\n- **The Hook**: ${aud} are bleeding time and budget on *${prob.slice(0, 60)}*.\n- **The Engine**: ${name} delivers *${sol.slice(0, 60)}* with a moat in *${moat.slice(0, 40)}*.\n- **Market Sizing**: Capitalizing on a **${tam}** sector opportunity.`,
       suggested_followups: [
         "What traction metrics do investors want to see?",
         "What is my estimated CAC vs LTV?",
@@ -199,7 +229,7 @@ function generateLocalAdvice(query, report) {
     };
   }
 
-  // Feasibility Score & Verdict
+  // 11. Feasibility Score & Verdict
   if (/score|feasib|verdict|viability|rating|why/i.test(q)) {
     const clarity = report?.validation_scores?.problem_clarity || 80;
     const solScore = report?.validation_scores?.solution_strength || 80;
@@ -214,9 +244,22 @@ function generateLocalAdvice(query, report) {
     };
   }
 
+  // 12. Tech Architecture & Stack
+  if (/tech|stack|architecture|code|database|ai model|api|framework|backend|frontend/i.test(q)) {
+    return {
+      reply: `**Recommended Tech Architecture for ${name}:**\n\n- **Frontend & App**: Lightweight React/Next.js shell for fast iteration.\n- **Backend & AI**: FastAPI / Node.js backend with async LLM orchestration.\n- **Database & Auth**: PostgreSQL with Supabase or Firebase for rapid setup.`,
+      suggested_followups: [
+        "What should I build first in my MVP?",
+        "How do I keep API token costs low?",
+        "How can I get my first 100 users?"
+      ]
+    };
+  }
+
   // General fallback
   const moat = comps.unique_moat || `Specialized workflow platform for ${aud}.`;
-  const firstPhase = gtm.launch_strategy?.[0]?.phase_name || 'Pre-launch customer discovery';
+  const phases = Array.isArray(gtm.launch_strategy) ? gtm.launch_strategy : [];
+  const firstPhase = (phases.length > 0 && typeof phases[0] === 'object') ? (phases[0].phase_name || 'Pre-launch customer discovery') : 'Pre-launch discovery';
   return {
     reply: `**Strategic Advisory for ${name}:**\n\n- **Thesis Viability**: **${overallScore}%** (${verdict}).\n- **Core Moat**: ${moat}\n- **Next Priority**: Execute *${firstPhase}* with 10 beta prospects in ${aud}.`,
     suggested_followups: [
@@ -292,7 +335,7 @@ export default function StartupAdvisor({ report, isCompact = false }) {
   }, [messages, isLoading]);
 
   const handleResetChat = () => {
-    setMessages([initialWelcome]);
+    setMessages([createInitialWelcome(startupName, overallScore)]);
     try {
       sessionStorage.removeItem(storageKey);
     } catch (_) {}
