@@ -1,4 +1,5 @@
 import random
+import re
 from typing import Dict, Any
 from models.validation import (
     ValidationReportResponse, StartupSummary, ExtractedIdea,
@@ -39,9 +40,9 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
 
     text_corpus = f"{startup_name} {ind} {prob} {sol} {audience}".lower()
 
-    # Multi-Industry Domain Intelligence Profiles
-    if any(k in text_corpus for k in ["hotel", "hospitality", "resort", "guest", "booking", "concierge"]):
-        # Hospitality / HotelHive
+    # Multi-Industry Domain Intelligence Profiles using precise word boundaries
+    if re.search(r"\b(hotel|hotels|resort|resorts|hospitality|hotelier|pms|front desk|guest concierge)\b", text_corpus, re.IGNORECASE):
+        # Hospitality / Hotels
         comp_1_name = "Cloudbeds & Opera PMS"
         comp_2_name = "Little Hotelier & SiteMinder"
         comp_1_desc = "Legacy property management systems with complex legacy interfaces."
@@ -58,13 +59,13 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Hospitality Associations & Conferences", description="Partner with regional boutique hotel associations and showcase live WhatsApp guest flows.", expected_cac="Organic (₹0 - ₹2,000)", conversion_strategy="Free hotel audit report and revenue recovery calculator.")
         ]
         pricing_tiers_list = [
-            "Boutique Starter: ₹7,999/month (Up to 25 rooms)",
-            "Resort Pro: ₹19,999/month (Up to 75 rooms + 1% direct booking fee)",
-            "Multi-Property Enterprise: ₹39,999/month (Unlimited rooms & custom integrations)"
+            f"{startup_name} Starter: ₹7,999/month (Up to 25 rooms)",
+            f"{startup_name} Pro: ₹19,999/month (Up to 75 rooms + 1% direct booking fee)",
+            f"{startup_name} Enterprise: ₹39,999/month (Unlimited rooms & custom integrations)"
         ]
 
-    elif any(k in text_corpus for k in ["study", "edtech", "student", "exam", "flashcard", "lecture", "quiz", "school", "course", "learn"]):
-        # EdTech / Education
+    elif re.search(r"\b(edtech|flashcard|flashcards|exam prep|lecture notes|quizzing|tutoring|studyflow|active recall|student exam)\b", text_corpus, re.IGNORECASE):
+        # EdTech / Education (strict terms to avoid matching 'machine learning' or 'study')
         comp_1_name = "Quizlet & Anki"
         comp_2_name = "Chegg Study & CourseHero"
         comp_1_desc = "Manual flashcard platforms requiring hours of tedious card creation."
@@ -81,12 +82,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="University Course Exam SEO", description="Publish automated study guides and practice flashcard decks for top college courses.", expected_cac="Low (₹200 - ₹600)", conversion_strategy="Instant quiz sandbox without login.")
         ]
         pricing_tiers_list = [
-            "Free Student: ₹0/month (3 course uploads & basic flashcards)",
-            "StudyFlow Pro: ₹499/month or ₹3,999/year (Unlimited uploads, AI mock exams & audio ingestion)",
-            "Campus Study Group: ₹1,499/semester (Up to 5 student accounts)"
+            f"{startup_name} Free Student: ₹0/month (3 course uploads & basic flashcards)",
+            f"{startup_name} Pro: ₹499/month or ₹3,999/year (Unlimited uploads, AI mock exams & audio ingestion)",
+            f"{startup_name} Campus Group: ₹1,499/semester (Up to 5 student accounts)"
         ]
 
-    elif any(k in text_corpus for k in ["food", "plate", "meal", "recipe", "grocery", "fridge", "waste", "cooking", "restaurant"]):
+    elif re.search(r"\b(foodtech|recipes?|grocery|groceries|fridge|food waste|cooking|meal prep|pantry|diet plan)\b", text_corpus, re.IGNORECASE):
         # FoodTech / Food & Grocery
         comp_1_name = "Mealime & Paprika"
         comp_2_name = "MyFitnessPal & Yummly"
@@ -99,18 +100,18 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             MvpFeatureItem(feature_name="1-Click Supermarket Cart Sync", description="Export missing recipe ingredients directly to grocery delivery partner carts (Zepto/Blinkit/Instacart).", rationale="Unlocks instant affiliate monetization per order.", complexity="Medium", priority="MUST HAVE")
         ]
         channels_list = [
-            GtmChannel(channel_name="Food & Meal-Prep Creator Partnerships", description="Partner with food influencers for 'Fridge Cleanout Challenge' videos using FreshPlate.", expected_cac="Low (₹200 - ₹600)", conversion_strategy="Free 14-day premium trial with custom meal plans."),
+            GtmChannel(channel_name="Food & Meal-Prep Creator Partnerships", description=f"Partner with food influencers for 'Fridge Cleanout Challenge' videos using {startup_name}.", expected_cac="Low (₹200 - ₹600)", conversion_strategy="Free 14-day premium trial with custom meal plans."),
             GtmChannel(channel_name="Supermarket & Quick-Commerce Affiliate Integrations", description="In-app ingredient replenishment revenue sharing with local delivery platforms.", expected_cac="Organic (₹0 - ₹300)", conversion_strategy="₹100 discount coupon on first delivery order."),
             GtmChannel(channel_name="Zero-Waste & Budget Family Communities", description="Community guides and weekly meal plans shared in parenting and budget living forums.", expected_cac="Low (₹150 - ₹400)", conversion_strategy="Free printable weekly meal calendar.")
         ]
         pricing_tiers_list = [
-            "Free Meal Planner: ₹0/month (Basic fridge recipes & manual shopping list)",
-            "FreshPlate Premium: ₹299/month or ₹2,499/year (Unlimited AI recipes, nutrition tracking & auto-cart sync)",
-            "Family Chef Plan: ₹599/month (Multi-diet profiles, allergen filters & pantry sync)"
+            f"{startup_name} Free Meal Planner: ₹0/month (Basic fridge recipes & manual shopping list)",
+            f"{startup_name} Premium: ₹299/month or ₹2,499/year (Unlimited AI recipes, nutrition tracking & auto-cart sync)",
+            f"{startup_name} Family Plan: ₹599/month (Multi-diet profiles, allergen filters & pantry sync)"
         ]
 
-    elif any(k in text_corpus for k in ["creator", "video", "audio", "youtube", "podcast", "dubbing", "influencer", "content creation", "social media"]):
-        # Creator Economy & Media AI (checked before health/med)
+    elif re.search(r"\b(creator economy|youtube|podcast|dubbing|voice cloning|video edit|influencer|reels|shorts|content creation)\b", text_corpus, re.IGNORECASE):
+        # Creator Economy & Media AI
         comp_1_name = "Descript & CapCut"
         comp_2_name = "ElevenLabs & Jasper"
         comp_1_desc = "General video editors without specialized multi-language viral distribution."
@@ -127,12 +128,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Creator Management Agency Partnerships", description="Bulk licensing for talent management agencies handling multiple creator channels.", expected_cac="Moderate (₹1,500 - ₹3,000)", conversion_strategy="Agency revenue share and volume discounts.")
         ]
         pricing_tiers_list = [
-            "Creator Starter: ₹0/month (15 mins/mo video export & basic captions)",
-            "Pro Creator: ₹799/month or ₹6,999/year (Unlimited exports, 4K render & 3-language dubbing)",
-            "Studio Agency: ₹3,499/month (Multi-creator workspace, unlimited dubbing & priority GPU)"
+            f"{startup_name} Starter: ₹0/month (15 mins/mo video export & basic captions)",
+            f"{startup_name} Pro: ₹799/month or ₹6,999/year (Unlimited exports, 4K render & 3-language dubbing)",
+            f"{startup_name} Studio: ₹3,499/month (Multi-creator workspace, unlimited dubbing & priority GPU)"
         ]
 
-    elif any(k in text_corpus for k in ["healthtech", "medicine", "medical", "doctor", "clinic", "patient", "dermatology", "pharma", "clinical", "hospital"]):
+    elif re.search(r"\b(healthtech|medtech|telemedicine|clinic|clinics|doctor|doctors|patient|patients|dermatolog\w*|pharma|clinical|hospital|diagnos\w*)\b", text_corpus, re.IGNORECASE):
         # HealthTech / MedTech
         comp_1_name = "Practo & Epic EHR"
         comp_2_name = "Teladoc Health & Cerner"
@@ -150,12 +151,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Physician-to-Physician Referral Network", description="Referral incentives for doctors recommending the triage tool to partner clinics.", expected_cac="Organic (₹0 - ₹1,500)", conversion_strategy="Extended practice subscription credits.")
         ]
         pricing_tiers_list = [
-            "Solo Practice: ₹3,999/month (1 doctor & up to 300 consultations/mo)",
-            "Clinic Pro: ₹12,999/month (Up to 5 doctors, full EHR sync & AI triage)",
-            "Hospital Network: ₹39,999/month (Multi-department triage & custom HIS integration)"
+            f"{startup_name} Solo Practice: ₹3,999/month (1 doctor & up to 300 consultations/mo)",
+            f"{startup_name} Clinic Pro: ₹12,999/month (Up to 5 doctors, full EHR sync & AI triage)",
+            f"{startup_name} Hospital Network: ₹39,999/month (Multi-department triage & custom HIS integration)"
         ]
 
-    elif any(k in text_corpus for k in ["fintech", "finance", "invoice", "accounting", "tax", "gst", "payment", "bank", "credit", "ledger"]):
+    elif re.search(r"\b(fintech|invoices?|accounting|taxes?|taxation|gst|bookkeeping|bank ledger|banking|payment gateway)\b", text_corpus, re.IGNORECASE):
         # FinTech / Accounting
         comp_1_name = "Tally Prime & QuickBooks"
         comp_2_name = "Razorpay & Zoho Books"
@@ -173,12 +174,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="B2B LinkedIn Outbound to Finance Directors", description="Personalized benchmark reports showing hours saved on month-end closing.", expected_cac="Moderate (₹3,000 - ₹6,000)", conversion_strategy="Free 14-day reconciliation trial.")
         ]
         pricing_tiers_list = [
-            "SME Starter: ₹1,999/month (Up to 500 transactions & basic GST)",
-            "Growth Ledger: ₹6,999/month (Unlimited invoices, multi-bank sync & cashflow AI)",
-            "Enterprise Finance: ₹24,999/month (Multi-entity consolidation & ERP integration)"
+            f"{startup_name} SME Starter: ₹1,999/month (Up to 500 transactions & basic GST)",
+            f"{startup_name} Growth Ledger: ₹6,999/month (Unlimited invoices, multi-bank sync & cashflow AI)",
+            f"{startup_name} Enterprise Finance: ₹24,999/month (Multi-entity consolidation & ERP integration)"
         ]
 
-    elif any(k in text_corpus for k in ["agri", "farm", "crop", "soil", "agriculture", "farmer", "paddy", "yield", "irrigation"]):
+    elif re.search(r"\b(agritech|farming|farmers?|crops?|soil|agricultur\w*|irrigation|paddy|harvest|pests?)\b", text_corpus, re.IGNORECASE):
         # AgriTech / Farming
         comp_1_name = "AgroStar & CropIn"
         comp_2_name = "DeHaat & Fasal IoT"
@@ -196,12 +197,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Agri-Input Retailer Partnerships", description="Place QR codes and interactive kiosks at fertilizer and seed stores.", expected_cac="Low (₹400 - ₹800)", conversion_strategy="Instant free soil advisory on first scan.")
         ]
         pricing_tiers_list = [
-            "Farmer Season Pass: ₹299/crop cycle (Full advisory & disease scanning)",
-            "FPO Village Hub: ₹4,999/season (Up to 100 farmer profiles & group market linkage)",
-            "Agri-Enterprise: ₹24,999/year (Supply chain traceability & procurement analytics)"
+            f"{startup_name} Season Pass: ₹299/crop cycle (Full advisory & disease scanning)",
+            f"{startup_name} FPO Village Hub: ₹4,999/season (Up to 100 farmer profiles & group market linkage)",
+            f"{startup_name} Agri-Enterprise: ₹24,999/year (Supply chain traceability & procurement analytics)"
         ]
 
-    elif any(k in text_corpus for k in ["legal", "contract", "lawyer", "compliance", "clause", "nda", "advocate", "law firm"]):
+    elif re.search(r"\b(legaltech|contracts?|lawyers?|compliance|clauses?|nda|advocates?|law firm|legal team)\b", text_corpus, re.IGNORECASE):
         # LegalTech / Compliance
         comp_1_name = "SpotDraft & Ironclad"
         comp_2_name = "Vakilsearch & Lawyered"
@@ -219,12 +220,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Law Firm & Boutique Practice Referrals", description="Provide law firms with a co-branded redline assistant for their SME clients.", expected_cac="Organic (₹0 - ₹1,500)", conversion_strategy="Partner revenue share on paid seats.")
         ]
         pricing_tiers_list = [
-            "Legal Starter: ₹3,499/month (Up to 20 contract reviews/mo & standard templates)",
-            "In-House Counsel Pro: ₹12,999/month (Unlimited reviews, redline editor & e-sign)",
-            "Law Firm Enterprise: ₹34,999/month (Multi-client management & custom risk playbooks)"
+            f"{startup_name} Starter: ₹3,499/month (Up to 20 contract reviews/mo & standard templates)",
+            f"{startup_name} Counsel Pro: ₹12,999/month (Unlimited reviews, redline editor & e-sign)",
+            f"{startup_name} Enterprise: ₹34,999/month (Multi-client management & custom risk playbooks)"
         ]
 
-    elif any(k in text_corpus for k in ["logistics", "supply chain", "fleet", "warehouse", "delivery", "shipping", "freight", "electric vehicle", "ev route"]):
+    elif re.search(r"\b(logistics|fleets?|warehouse|delivery routes?|shipping|freight|3pl|electric vehicles?|ev fleet)\b", text_corpus, re.IGNORECASE):
         # Logistics & Fleet Management
         comp_1_name = "Shiprocket & Delhivery Dashboard"
         comp_2_name = "FarEye & Locus AI"
@@ -242,12 +243,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="EV Fleet & Charging Infrastructure Alliances", description="Co-marketing with commercial EV manufacturers and charging station networks.", expected_cac="Organic (₹0 - ₹1,500)", conversion_strategy="Pre-installed software discounts.")
         ]
         pricing_tiers_list = [
-            "Fleet Starter: ₹4,999/month (Up to 15 vehicles & basic route optimizer)",
-            "Logistics Pro: ₹14,999/month (Up to 50 vehicles, live telemetry & driver app)",
-            "Enterprise Fleet: ₹39,999/month (Unlimited vehicles & custom ERP integration)"
+            f"{startup_name} Starter: ₹4,999/month (Up to 15 vehicles & basic route optimizer)",
+            f"{startup_name} Pro: ₹14,999/month (Up to 50 vehicles, live telemetry & driver app)",
+            f"{startup_name} Enterprise: ₹39,999/month (Unlimited vehicles & custom ERP integration)"
         ]
 
-    elif any(k in text_corpus for k in ["recruiting", "recruitment", "hiring", "hrtech", "talent", "resume", "applicant", "interviews"]):
+    elif re.search(r"\b(recruiting|recruitment|hiring|hrtech|talent acquisition|resumes?|applicants?|interviews?)\b", text_corpus, re.IGNORECASE):
         # HRTech & Talent Acquisition
         comp_1_name = "Naukri & LinkedIn Recruiter"
         comp_2_name = "Greenhouse & Lever"
@@ -265,12 +266,12 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Recruitment Agency Channel Partnerships", description="Provide boutique recruitment agencies with an automated pre-screening dashboard.", expected_cac="Organic (₹0 - ₹1,500)", conversion_strategy="Agency volume licensing revenue share.")
         ]
         pricing_tiers_list = [
-            "Recruiter Starter: ₹3,499/month (Up to 3 active jobs & 200 candidate screenings)",
-            "Growth Talent: ₹9,999/month (Unlimited active jobs, auto-scheduling & assessments)",
-            "Enterprise Staffing: ₹29,999/month (Multi-recruiter seats & ATS integration)"
+            f"{startup_name} Starter: ₹3,499/month (Up to 3 active jobs & 200 candidate screenings)",
+            f"{startup_name} Talent Pro: ₹9,999/month (Unlimited active jobs, auto-scheduling & assessments)",
+            f"{startup_name} Enterprise: ₹29,999/month (Multi-recruiter seats & ATS integration)"
         ]
 
-    elif any(k in text_corpus for k in ["code", "developer", "devtools", "cyber", "github", "cve", "vulnerability", "devops", "cloud", "security"]):
+    elif re.search(r"\b(devtools|cybersecurity|github|cve|vulnerabilit\w*|devops|code security|infosec)\b", text_corpus, re.IGNORECASE):
         # Developer Tools / CyberSecurity
         comp_1_name = "Snyk & GitHub Dependabot"
         comp_2_name = "SonarQube & Datadog"
@@ -288,33 +289,34 @@ def generate_mock_report(name: str, problem: str, solution: str, target_audience
             GtmChannel(channel_name="Developer Discord & Reddit Tech Communities", description="Technical postmortems and teardowns of real-world dependency supply chain attacks.", expected_cac="Organic (₹0 - ₹800)", conversion_strategy="Free CLI scanner tool.")
         ]
         pricing_tiers_list = [
-            "Developer Free: ₹0/month (Public repositories & 1 private repo)",
-            "Team Security Pro: ₹4,999/month (Up to 10 private repos & automated PR fixes)",
-            "Enterprise DevSecOps: ₹29,999/month (Unlimited repos, SOC2 compliance & custom policies)"
+            f"{startup_name} Dev Free: ₹0/month (Public repositories & 1 private repo)",
+            f"{startup_name} Security Pro: ₹4,999/month (Up to 10 private repos & automated PR fixes)",
+            f"{startup_name} Enterprise: ₹29,999/month (Unlimited repos, SOC2 compliance & custom policies)"
         ]
 
     else:
         # Dynamic Synthesis for Any Custom Startup Idea
-        ind_keyword = ind.split()[0] if ind else "Industry"
-        comp_1_name = f"Legacy {ind_keyword} Software"
-        comp_2_name = f"Manual Spreadsheets & Workarounds"
-        comp_1_desc = f"Established enterprise software for {ind_keyword.lower()} with high pricing and complex UI."
-        comp_2_desc = "Manual tracking methods that lack real-time automation and error prevention."
-        moat_text = f"Specialized AI workflow automation engine built strictly for {audience} in {ind}."
+        ind_clean = ind.replace("/", " ").split()[0] if ind else "Industry"
+        aud_clean = audience.split(",")[0] if audience else "target customers"
+        comp_1_name = f"Legacy {ind_clean} Solutions"
+        comp_2_name = f"Manual Spreadsheets & Legacy Tools"
+        comp_1_desc = f"Incumbent software in {ind_clean} with bloated enterprise pricing and slow workflows."
+        comp_2_desc = f"Manual ad-hoc processes that lack intelligence, creating time waste for {aud_clean}."
+        moat_text = f"Specialized AI workflow automation engine built strictly for {aud_clean} in {ind}."
         must_features = [
             MvpFeatureItem(feature_name=f"{startup_name} AI Core Engine", description=f"Automates key {ind} workflows to solve {prob[:55]} in 1 click.", rationale="Delivers the primary core value proposition instantly.", complexity="Medium", priority="MUST HAVE"),
-            MvpFeatureItem(feature_name=f"Self-Service Workflow Portal for {audience.split(',')[0]}", description="Intuitive interface designed for frictionless onboarding and immediate output.", rationale="Eliminates the steep learning curve of legacy tools.", complexity="Low", priority="MUST HAVE"),
+            MvpFeatureItem(feature_name=f"Self-Service Workspace for {aud_clean}", description="Intuitive interface designed for frictionless onboarding and immediate output.", rationale="Eliminates the steep learning curve of legacy tools.", complexity="Low", priority="MUST HAVE"),
             MvpFeatureItem(feature_name="Automated Insights & Export Hub", description="Download PDF summaries, copy reports, and sync results with existing toolsets.", rationale="Enables immediate sharing and stakeholder alignment.", complexity="Low", priority="MUST HAVE")
         ]
         channels_list = [
-            GtmChannel(channel_name=f"Direct Founder Outreach to {audience.split(',')[0]}", description=f"Personalized audits showing decision-makers how {startup_name} saves 10+ hours weekly.", expected_cac="Low (₹1,500 - ₹3,500)", conversion_strategy="Free interactive pilot with priority support."),
+            GtmChannel(channel_name=f"Direct Founder Outreach to {aud_clean}", description=f"Personalized audits showing decision-makers how {startup_name} saves 10+ hours weekly.", expected_cac="Low (₹1,500 - ₹3,500)", conversion_strategy="Free interactive pilot with priority support."),
             GtmChannel(channel_name=f"Targeted {ind} Community Hubs & Case Studies", description=f"Publish teardowns solving {prob[:45]} in niche industry groups and forums.", expected_cac="Organic (₹0 - ₹1,000)", conversion_strategy="Free beta sandbox access."),
             GtmChannel(channel_name=f"Google Search & Problem Solution Guides", description=f"SEO guides addressing high-intent queries around {ind} workflow bottlenecks.", expected_cac="Moderate (₹2,000 - ₹4,500)", conversion_strategy="Instant self-service demo trial.")
         ]
         pricing_tiers_list = [
-            f"Starter Tier: ₹2,499/month (Core {ind} automation for {audience.split(',')[0]})",
-            f"Pro Tier: ₹7,999/month (Advanced automation, team collaboration & integrations)",
-            f"Enterprise Tier: ₹24,999/month (Dedicated support, custom rules & priority SLAs)"
+            f"{startup_name} Starter: ₹2,499/month (Core {ind_clean} automation for {aud_clean})",
+            f"{startup_name} Pro: ₹7,999/month (Advanced automation, team collaboration & integrations)",
+            f"{startup_name} Enterprise: ₹24,999/month (Dedicated support, custom rules & priority SLAs)"
         ]
 
     competitors_list = [
