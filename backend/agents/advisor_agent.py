@@ -33,6 +33,33 @@ def _safe_list_str(val: Any) -> List[str]:
             res.append(str(item))
     return res
 
+def clean_no_code(text: str) -> str:
+    """Strips any raw programming source code blocks from the reply, keeping only plain-English conceptual explanations."""
+    if not text:
+        return ""
+    # Strip markdown code blocks e.g. ```javascript ... ```
+    def _strip_code(match):
+        code = match.group(2).strip()
+        # Keep non-code markdown or comments as clean bullet points
+        lines = [l.strip() for l in code.split('\n') if l.strip()]
+        cleaned_lines = []
+        for l in lines:
+            if l.startswith(("//", "#", "/*", "*", "<!--")):
+                clean_comment = re.sub(r"^(//|#|/\*|\*|<!--)\s*", "", l).strip()
+                if clean_comment and not clean_comment.endswith("*/"):
+                    cleaned_lines.append(f"- **Logic**: {clean_comment}")
+            elif not re.match(r"^(import|const|let|var|function|async|def|class|return|from|npm|pip|export|require|\{|\}|\[|\]|\$)\b", l):
+                cleaned_lines.append(f"- {l}")
+        if cleaned_lines:
+            return "\n" + "\n".join(cleaned_lines[:5]) + "\n"
+        return ""
+
+    cleaned = re.sub(r"```(?:\w+)?\n?([\s\S]*?)```", _strip_code, text)
+    # Clean any residual JSON/raw braces
+    cleaned = re.sub(r"\n\s*\{\s*\n", "\n", cleaned)
+    cleaned = re.sub(r"\n\s*\}\s*\n", "\n", cleaned)
+    return cleaned.strip()
+
 def extract_reply_and_followups(text: str) -> tuple:
     """Robustly parses LLM JSON or clean Markdown output without leaking JSON artifacts or escaped newlines."""
     cleaned = text.strip()
@@ -41,60 +68,65 @@ def extract_reply_and_followups(text: str) -> tuple:
         cleaned = re.sub(r"\n?\s*```$", "", cleaned)
         cleaned = cleaned.strip()
 
+    reply = ""
+    followups = []
+
     # 1. Try standard JSON load with strict=False
     try:
         data = json.loads(cleaned, strict=False)
         if isinstance(data, dict):
             reply = str(data.get("reply", "")).strip()
             followups = data.get("suggested_followups", [])
-            if reply:
-                reply = reply.replace('\\n', '\n').replace('\\"', '"')
-                return reply, [str(f) for f in followups if f]
     except Exception:
         pass
 
-    # 2. Extract outer-most JSON object from first '{' to last '}'
-    first_brace = cleaned.find("{")
-    last_brace = cleaned.rfind("}")
-    if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
-        candidate = cleaned[first_brace:last_brace + 1]
-        try:
-            data = json.loads(candidate, strict=False)
-            if isinstance(data, dict):
-                reply = str(data.get("reply", "")).strip()
-                followups = data.get("suggested_followups", [])
-                if reply:
-                    reply = reply.replace('\\n', '\n').replace('\\"', '"')
-                    return reply, [str(f) for f in followups if f]
-        except Exception:
-            pass
+    # 2. Extract outer-most JSON object from first '{' to last '}' if not yet parsed
+    if not reply:
+        first_brace = cleaned.find("{")
+        last_brace = cleaned.rfind("}")
+        if first_brace != -1 and last_brace != -1 and last_brace > first_brace:
+            candidate = cleaned[first_brace:last_brace + 1]
+            try:
+                data = json.loads(candidate, strict=False)
+                if isinstance(data, dict):
+                    reply = str(data.get("reply", "")).strip()
+                    followups = data.get("suggested_followups", [])
+            except Exception:
+                pass
 
     # 3. Regex extraction fallback for malformed JSON strings
-    reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*,\s*"suggested_followups"', text)
-    if not reply_match:
-        reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*\}', text)
-    
-    followups = []
-    followups_match = re.search(r'"suggested_followups"\s*:\s*\[([\s\S]*?)\]', text)
-    if followups_match:
-        items = re.findall(r'"([^"]+)"', followups_match.group(1))
-        followups = [it.strip() for it in items if it.strip()]
+    if not reply:
+        reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*,\s*"suggested_followups"', text)
+        if not reply_match:
+            reply_match = re.search(r'"reply"\s*:\s*"([\s\S]*?)"\s*\}', text)
 
-    if reply_match:
-        raw_rep = reply_match.group(1)
-        try:
-            unescaped = raw_rep.encode('utf-8').decode('unicode_escape')
-            return unescaped.replace('\\n', '\n').replace('\\"', '"').strip(), followups
-        except Exception:
-            return raw_rep.replace(r'\n', '\n').replace(r'\"', '"').strip(), followups
+        followups_match = re.search(r'"suggested_followups"\s*:\s*\[([\s\S]*?)\]', text)
+        if followups_match:
+            items = re.findall(r'"([^"]+)"', followups_match.group(1))
+            followups = [it.strip() for it in items if it.strip()]
+
+        if reply_match:
+            raw_rep = reply_match.group(1)
+            try:
+                unescaped = raw_rep.encode('utf-8').decode('unicode_escape')
+                reply = unescaped
+            except Exception:
+                reply = raw_rep
 
     # 4. Clean fallback text
-    clean_text = text.strip()
-    if clean_text.startswith("{") and '"reply"' in clean_text:
-        clean_text = re.sub(r'^\s*\{\s*"reply"\s*:\s*"?', '', clean_text)
-        clean_text = re.sub(r'"?\s*,\s*"suggested_followups"[\s\S]*$', '', clean_text)
-    clean_text = clean_text.replace('\\n', '\n').replace('\\"', '"').strip()
-    return clean_text, followups
+    if not reply:
+        clean_text = text.strip()
+        if clean_text.startswith("{") and '"reply"' in clean_text:
+            clean_text = re.sub(r'^\s*\{\s*"reply"\s*:\s*"?', '', clean_text)
+            clean_text = re.sub(r'"?\s*,\s*"suggested_followups"[\s\S]*$', '', clean_text)
+        reply = clean_text
+
+    # Normalize newlines and strip any raw programming code
+    reply = reply.replace('\\n', '\n').replace('\\"', '"').strip()
+    reply = clean_no_code(reply)
+
+    clean_followups = [str(f) for f in followups if f] if followups else DEFAULT_SUGGESTIONS[:3]
+    return reply, clean_followups
 
 class AdvisorAgent:
     def __init__(self):
@@ -207,7 +239,7 @@ class AdvisorAgent:
         ])
 
         prompt = f"""
-        You are an elite, world-class AI Startup Co-founder, Technical Advisor, and Venture Partner dedicated to "{startup_name}".
+        You are an elite, world-class AI Startup Co-founder, Venture Partner, and Strategic Advisor dedicated to "{startup_name}".
         
         [STARTUP DOSSIER & CONTEXT]
         {context_text}
@@ -219,16 +251,16 @@ class AdvisorAgent:
         "{user_msg}"
 
         ADVISORY & INTELLIGENCE GUIDELINES:
-        1. ACT AS A TRUE DEDICATED LLM CO-FOUNDER: Answer ANY question the founder asks—whether it's strategic advice, code snippets, cold emails, marketing taglines, equity/cap-table logic, competitive teardowns, user interview scripts, pitch deck slides, or technical architecture.
-        2. CONTEXT GROUNDING: Deeply incorporate the specific realities of {startup_name} (target audience: {target_audience}, core problem, solution, unit economics, and competitive moat).
-        3. CODE & ARTIFACTS: If the user asks for code, scripts, templates, emails, or outlines, provide COMPLETE, production-ready markdown code blocks (e.g. ```python, ```javascript, ```bash) or structured copy rather than generic placeholders.
+        1. ACT AS A DEDICATED STRATEGIC & PRODUCT CO-FOUNDER: Answer ANY question the founder asks—strategic advice, customer acquisition tactics, cold emails, marketing taglines, equity/cap-table logic, competitive teardowns, user interview scripts, pitch deck slides, or technical architecture.
+        2. STRICT NO RAW CODE RULE: NEVER output raw programming source code (such as JavaScript, TypeScript, Python, C++, or SQL code blocks). Founders need actionable strategic, conceptual, architectural, and business guidance. If asked about technical features, algorithms, or integrations, explain the logic workflow, data flow, architecture steps, and business rules in plain, polished English using numbered steps or clear bullet points.
+        3. CONTEXT GROUNDING: Deeply incorporate the specific realities of {startup_name} (target audience: {target_audience}, core problem, solution, unit economics, and competitive moat).
         4. STRUCTURE & FORMATTING: Use clean, polished markdown with bold key takeaways, concise bullet points, and high-impact framing. Avoid repetitive filler or generic fluff.
         5. CURRENCY: Default to Indian Rupees (₹) for pricing and financial metrics when relevant, or USD ($) if global SaaS is discussed.
         6. SUGGESTED NEXT STEPS: Provide 3 sharp, highly contextual follow-up questions tailored specifically to the conversation.
 
         Return strictly a valid JSON object matching this schema:
         {{
-            "reply": "Your comprehensive, high-signal markdown response (with code blocks, bullet points, or structured guidance as requested).",
+            "reply": "Your comprehensive, high-signal markdown response in plain English (numbered steps, bullet points, strategic frameworks - ZERO RAW CODE).",
             "suggested_followups": [
                 "Sharp follow-up question 1",
                 "Sharp follow-up question 2",
@@ -237,7 +269,7 @@ class AdvisorAgent:
         }}
         """
 
-        system_instruction = "You are a world-class startup co-founder and technical advisor LLM. Provide deep, actionable, high-signal responses with production-ready code, persuasive copy, or sharp strategic frameworks tailored to the startup dossier."
+        system_instruction = "You are a world-class startup co-founder, venture partner, and strategic advisor. Provide deep, actionable, high-signal business, product, and architectural guidance in clear English with bold key points. DO NOT output raw programming code (like JS, Python, etc.)—always explain algorithms, technical systems, and workflows conceptually with clear step-by-step logic."
 
         try:
             response_text = await call_gemini(prompt, expect_json=True, system_instruction=system_instruction)

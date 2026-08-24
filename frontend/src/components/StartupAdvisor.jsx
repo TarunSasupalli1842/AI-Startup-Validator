@@ -450,14 +450,6 @@ export default function StartupAdvisor({ report, isCompact = false }) {
     });
   };
 
-  const [copiedCodeId, setCopiedCodeId] = useState(null);
-
-  const handleCopyCode = (codeText, id) => {
-    navigator.clipboard.writeText(codeText);
-    setCopiedCodeId(id);
-    setTimeout(() => setCopiedCodeId(null), 2000);
-  };
-
   const renderFormattedContent = (content) => {
     // 1. Normalize literal \n or escaped characters into real newlines
     let textToRender = (content || '')
@@ -475,128 +467,89 @@ export default function StartupAdvisor({ report, isCompact = false }) {
       } catch (_) {}
     }
 
-    // Process markdown code blocks ```lang ... ``` first
-    const parts = [];
-    const codeBlockRegex = /```(\w+)?\n?([\s\S]*?)```/g;
-    let lastIndex = 0;
-    let match;
+    // 3. Strip any code block wrappers and convert comments/steps into clean bullets
+    textToRender = textToRender.replace(/```(?:\w+)?\n?([\s\S]*?)```/g, (match, code) => {
+      const lines = (code || '').split('\n').map(l => l.trim()).filter(Boolean);
+      const cleanLines = lines.map(l => {
+        if (l.startsWith('//') || l.startsWith('#') || l.startsWith('/*')) {
+          return `- **Logic**: ${l.replace(/^(\/\/|#|\/\*|\*)\s*/, '').replace(/\*\/$/, '')}`;
+        }
+        if (!/^(import|const|let|var|function|async|def|class|return|from|npm|pip|export|require|\{|\}|\[|\]|\$)\b/.test(l)) {
+          return `- ${l}`;
+        }
+        return null;
+      }).filter(Boolean);
+      return cleanLines.length > 0 ? `\n${cleanLines.join('\n')}\n` : '';
+    });
 
-    while ((match = codeBlockRegex.exec(textToRender)) !== null) {
-      if (match.index > lastIndex) {
-        parts.push({ type: 'text', text: textToRender.substring(lastIndex, match.index) });
-      }
-      parts.push({
-        type: 'code',
-        lang: match[1] || 'code',
-        code: match[2].trim()
-      });
-      lastIndex = match.index + match[0].length;
-    }
-    if (lastIndex < textToRender.length) {
-      parts.push({ type: 'text', text: textToRender.substring(lastIndex) });
-    }
+    const lines = textToRender.split('\n');
 
     return (
-      <div className="space-y-3 text-xs sm:text-sm leading-relaxed">
-        {parts.map((part, pIdx) => {
-          if (part.type === 'code') {
-            const codeId = `code_${pIdx}`;
+      <div className="space-y-2.5 text-xs sm:text-sm leading-relaxed">
+        {lines.map((line, idx) => {
+          const trimmed = line.trim();
+          if (!trimmed) {
+            return <div key={idx} className="h-1" />;
+          }
+
+          // Headers
+          if (trimmed.startsWith('### ') || trimmed.startsWith('## ')) {
+            const title = trimmed.replace(/^###?\s*/, '');
             return (
-              <div key={pIdx} className="my-3 rounded-2xl overflow-hidden border border-slate-700 bg-slate-950 text-slate-100 shadow-xl">
-                <div className="flex items-center justify-between px-4 py-2 bg-slate-900 border-b border-slate-800 text-[11px] font-mono text-slate-400">
-                  <span className="uppercase tracking-wider font-bold text-brand-400">{part.lang}</span>
-                  <button
-                    onClick={() => handleCopyCode(part.code, codeId)}
-                    className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all cursor-pointer text-xs"
-                  >
-                    {copiedCodeId === codeId ? (
-                      <>
-                        <Check size={12} className="text-emerald-400" />
-                        <span className="text-emerald-400 font-semibold">Copied!</span>
-                      </>
-                    ) : (
-                      <>
-                        <Copy size={12} />
-                        <span>Copy Code</span>
-                      </>
-                    )}
-                  </button>
-                </div>
-                <pre className="p-4 overflow-x-auto text-[11px] sm:text-xs font-mono leading-relaxed text-slate-200">
-                  <code>{part.code}</code>
-                </pre>
+              <h4 key={idx} className="font-display font-black text-sm sm:text-base text-slate-900 dark:text-white mt-3.5 mb-1.5 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-brand-500"></span>
+                {title}
+              </h4>
+            );
+          }
+
+          // Blockquotes
+          if (trimmed.startsWith('> ')) {
+            return (
+              <blockquote key={idx} className="border-l-4 border-brand-500 pl-3 py-1.5 my-2 bg-brand-50/50 dark:bg-brand-950/20 text-slate-700 dark:text-slate-300 italic rounded-r-xl">
+                {renderInlineFormatted(trimmed.substring(2))}
+              </blockquote>
+            );
+          }
+
+          // Standalone bold titles
+          if (trimmed.startsWith('**') && trimmed.endsWith('**') && !trimmed.includes('\n')) {
+            return (
+              <p key={idx} className="font-extrabold text-slate-900 dark:text-white mt-2">
+                {renderInlineFormatted(trimmed)}
+              </p>
+            );
+          }
+
+          // Bullet points
+          if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+            const bulletText = trimmed.substring(2);
+            return (
+              <div key={idx} className="flex items-start gap-2 ml-1 text-slate-700 dark:text-slate-300">
+                <span className="text-brand-500 font-black mt-0.5">•</span>
+                <p className="flex-1">{renderInlineFormatted(bulletText)}</p>
               </div>
             );
           }
 
-          const lines = part.text.split('\n');
+          // Numbered list
+          if (/^\d+\.\s/.test(trimmed)) {
+            const numMatch = trimmed.match(/^(\d+\.)/);
+            const num = numMatch ? numMatch[0] : '';
+            const rest = trimmed.replace(/^\d+\.\s*/, '');
+            return (
+              <div key={idx} className="flex items-start gap-2.5 ml-1 text-slate-700 dark:text-slate-300">
+                <span className="font-mono font-extrabold text-brand-600 dark:text-brand-400 shrink-0 text-xs bg-brand-50 dark:bg-brand-950/60 px-1.5 py-0.5 rounded-md border border-brand-200 dark:border-brand-800/60">{num}</span>
+                <p className="flex-1">{renderInlineFormatted(rest)}</p>
+              </div>
+            );
+          }
+
+          // Regular paragraph
           return (
-            <div key={pIdx} className="space-y-2">
-              {lines.map((line, idx) => {
-                const trimmed = line.trim();
-                if (!trimmed) {
-                  return <div key={idx} className="h-1" />;
-                }
-
-                // Headers
-                if (trimmed.startsWith('### ')) {
-                  return (
-                    <h4 key={idx} className="font-display font-extrabold text-sm sm:text-base text-slate-900 dark:text-white mt-3 mb-1.5 flex items-center gap-1.5">
-                      {trimmed.replace('### ', '')}
-                    </h4>
-                  );
-                }
-
-                // Blockquotes
-                if (trimmed.startsWith('> ')) {
-                  return (
-                    <blockquote key={idx} className="border-l-4 border-brand-500 pl-3 py-1 my-2 bg-brand-50/50 dark:bg-brand-950/20 text-slate-700 dark:text-slate-300 italic rounded-r-lg">
-                      {renderInlineFormatted(trimmed.substring(2))}
-                    </blockquote>
-                  );
-                }
-
-                // Standalone bold titles
-                if (trimmed.startsWith('**') && trimmed.endsWith('**') && !trimmed.includes('\n')) {
-                  return (
-                    <p key={idx} className="font-extrabold text-slate-900 dark:text-white mt-2">
-                      {renderInlineFormatted(trimmed)}
-                    </p>
-                  );
-                }
-
-                // Bullet points
-                if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
-                  const bulletText = trimmed.substring(2);
-                  return (
-                    <div key={idx} className="flex items-start gap-2 ml-1 text-slate-700 dark:text-slate-300">
-                      <span className="text-brand-500 font-black mt-0.5">•</span>
-                      <p className="flex-1">{renderInlineFormatted(bulletText)}</p>
-                    </div>
-                  );
-                }
-
-                // Numbered list
-                if (/^\d+\.\s/.test(trimmed)) {
-                  const numMatch = trimmed.match(/^(\d+\.)/);
-                  const num = numMatch ? numMatch[0] : '';
-                  const rest = trimmed.replace(/^\d+\.\s*/, '');
-                  return (
-                    <div key={idx} className="flex items-start gap-2 ml-1 text-slate-700 dark:text-slate-300">
-                      <span className="font-mono font-extrabold text-brand-600 dark:text-brand-400 shrink-0">{num}</span>
-                      <p className="flex-1">{renderInlineFormatted(rest)}</p>
-                    </div>
-                  );
-                }
-
-                // Regular paragraph
-                return (
-                  <p key={idx} className="text-slate-700 dark:text-slate-300">
-                    {renderInlineFormatted(trimmed)}
-                  </p>
-                );
-              })}
-            </div>
+            <p key={idx} className="text-slate-700 dark:text-slate-300">
+              {renderInlineFormatted(trimmed)}
+            </p>
           );
         })}
       </div>
