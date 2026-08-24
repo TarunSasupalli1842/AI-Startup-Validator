@@ -203,8 +203,8 @@ class AdvisorAgent:
             return self._fallback_chat(user_msg, report_data)
 
     def _fallback_chat(self, user_msg: str, report: Dict[str, Any]) -> AdvisorChatResponse:
-        """Comprehensive contextual rule-based advisory engine leveraging the full validation report."""
-        msg_lower = user_msg.lower().strip() if user_msg else ""
+        """Comprehensive contextual rule-based advisory engine with prioritized multi-intent classification."""
+        q = user_msg.lower().strip() if user_msg else ""
         
         idea = report.get("extracted_idea") if isinstance(report.get("extracted_idea"), dict) else {}
         name = _safe_str(idea.get("startup_name"), "your startup")
@@ -225,33 +225,61 @@ class AdvisorAgent:
         summary = report.get("summary") if isinstance(report.get("summary"), dict) else {}
         overall_score = scores.get("overall_score", 78)
 
-        # 1. Customer Acquisition, First 100 Users, Marketing Channels, Growth
-        if any(k in msg_lower for k in ["100", "acquire", "acquisition", "marketing", "growth", "channel", "lead", "traffic", "funnel", "get user", "get customer", "find user", "find customer", "early user", "users"]):
-            channels = gtm.get("acquisition_channels") if isinstance(gtm.get("acquisition_channels"), list) else []
-            if channels and len(channels) > 0:
-                channel_items = []
-                for c in channels[:2]:
+        # 1. Competitors, Rivalry, Moat, Advantage, Differentiator
+        if re.search(r"\b(competitor|competitors|rival|rivals|alternative|alternatives|moat|advantage|differentiat\w*|defensib\w*|compete|vs|beat competitors)\b", q):
+            comp_list = comps.get("competitors") or comps.get("direct_competitors") or []
+            if not isinstance(comp_list, list):
+                comp_list = []
+            moat = _safe_str(comps.get("unique_moat"), f"Hyper-tailored workflows and faster time-to-value for {aud}.")
+            if comp_list and len(comp_list) > 0:
+                comp_items = []
+                for c in comp_list[:2]:
                     if isinstance(c, dict):
-                        channel_items.append(f"- **{c.get('channel_name', 'Channel')}**: {c.get('description', '')} *(Target CAC: {c.get('expected_cac', 'Low')})*")
+                        c_name = c.get('name', 'Competitor')
+                        w_list = c.get('weaknesses') if isinstance(c.get('weaknesses'), list) else []
+                        c_weak = w_list[0] if (w_list and len(w_list) > 0) else "Legacy interface and slow workflow"
+                        c_adv = c.get('competitive_advantage', 'Instant setup and tailored features')
+                        comp_items.append(f"- **{c_name}**: {c_weak} *(Your edge: {c_adv})*")
                     else:
-                        channel_items.append(f"- **{str(c)}**: Direct founder outreach and targeted industry community.")
-                channels_str = "\n".join(channel_items)
+                        comp_items.append(f"- **{str(c)}**: Legacy architecture *(Your edge: Faster setup)*")
+                comp_str = "\n".join(comp_items)
             else:
-                channels_str = f"- **Direct Founder Outreach**: Contact 25 decision-makers in {aud} daily with personalized video audits.\n- **Niche Community Seeding**: Share valuable workflow teardowns in targeted industry hubs."
+                comp_str = f"- **Legacy Incumbents**: Heavy, slow, and expensive enterprise tools.\n- **Manual Spreadsheets**: Cheap but error-prone and unscalable."
 
-            reply = f"""**Fastest path to 100 paying users for {name}:**
+            reply = f"""**Competitive Landscape & Moat for {name}:**
 
-{channels_str}
-- **Playbook**: Offer white-glove onboarding to your first 20 beta users in exchange for case studies and referrals."""
+{comp_str}
+- **Defensible Moat**: {moat}."""
 
             followups = [
+                "How do I convince customers to switch from competitors?",
                 "What is my ideal pricing model?",
-                "What is my estimated CAC vs LTV?",
-                "What should I build first in my MVP?"
+                "Why is my startup risky?"
             ]
 
-        # 2. MVP Scope, Features, Tech, Timeline
-        elif any(k in msg_lower for k in ["build", "mvp", "feature", "moscow", "scope", "version", "timeline", "tech", "stack", "prototype"]):
+        # 2. Pricing, Monetization, Tiers, Charge
+        elif re.search(r"\b(price|pricing|monetiz\w*|charge|cost|fee|fees|tier|tiers|subscription|freemium|revenue model|how much to charge|how do i make money)\b", q):
+            tiers = gtm.get("pricing_tiers") if isinstance(gtm.get("pricing_tiers"), list) else []
+            pricing_strategy = _safe_str(gtm.get("pricing_strategy"), f"Value-aligned subscription for {aud}.")
+            if tiers and len(tiers) > 0:
+                tiers_str = "\n".join([f"- **{t}**" for t in tiers[:2]])
+            else:
+                tiers_str = f"- **Starter Tier**: Core workflow access for early {aud}.\n- **Pro Tier**: Advanced automation, integrations, and priority support."
+
+            reply = f"""**Pricing & Monetization Strategy for {name}:**
+
+{tiers_str}
+- **Model**: {pricing_strategy}
+- **Action**: Charge beta users upfront with an annual discount to validate true willingness to pay."""
+
+            followups = [
+                "How do I test pricing before writing code?",
+                "What is my estimated CAC vs LTV?",
+                "How can I get my first 100 paying customers?"
+            ]
+
+        # 3. MVP, Product Scope, Build First, Features
+        elif re.search(r"\b(what (should|to|can) (i|we) build|build first|mvp|feature|features|moscow|scope|prototype|version 1|v1|roadmap|target timeline)\b", q):
             must_haves = mvp.get("must_have") if isinstance(mvp.get("must_have"), list) else []
             timeline = _safe_str(mvp.get("target_timeline_weeks"), "4-6 Weeks")
             if must_haves and len(must_haves) > 0:
@@ -276,8 +304,8 @@ class AdvisorAgent:
                 "How should I price the MVP?"
             ]
 
-        # 3. Risk, Threats, Failure Points, Mitigation
-        elif any(k in msg_lower for k in ["risk", "risky", "threat", "fail", "danger", "pitfall", "regulation", "mitigat", "challenge"]):
+        # 4. Risk Analysis, Dangers, Mitigations
+        elif re.search(r"\b(risk|risks|risky|threat|threats|fail|failure|danger|pitfall|pitfalls|mitigat\w*|challenge|challenges|downside|vulnerabilit\w*)\b", q):
             risk_list = risks.get("risks") if isinstance(risks.get("risks"), list) else []
             risk_level = _safe_str(risks.get("overall_risk_level"), "Moderate")
             if risk_list and len(risk_list) > 0:
@@ -305,61 +333,67 @@ class AdvisorAgent:
                 "What should I build first in my MVP?"
             ]
 
-        # 4. Pricing, Monetization, Unit Economics, Subscription Tiers
-        elif any(k in msg_lower for k in ["price", "pricing", "monetiz", "charge", "cost", "fee", "revenue", "tier", "subscription", "pay", "freemium", "dollar", "rupee"]):
-            tiers = gtm.get("pricing_tiers") if isinstance(gtm.get("pricing_tiers"), list) else []
-            pricing_strategy = _safe_str(gtm.get("pricing_strategy"), f"Value-aligned subscription for {aud}.")
-            if tiers and len(tiers) > 0:
-                tiers_str = "\n".join([f"- **{t}**" for t in tiers[:2]])
-            else:
-                tiers_str = f"- **Starter Tier**: Core workflow access for early {aud}.\n- **Pro Tier**: Advanced automation, integrations, and priority support."
+        # 5. Cold Outreach, Email Script, Message Template
+        elif re.search(r"\b(cold (email|message|outreach)|email template|pitch script|outreach script|sales script|message to founder)\b", q):
+            reply = f"""**High-Converting Cold Outreach Template for {name}:**
 
-            reply = f"""**Pricing & Monetization Strategy for {name}:**
-
-{tiers_str}
-- **Model**: {pricing_strategy}
-- **Action**: Charge beta users upfront with an annual discount to validate true willingness to pay."""
+- **Subject**: Quick question regarding {prob[:35]}
+- **Body**: *"Hi [First Name], noticed your team is actively scaling {ind}. Most {aud} spend hours dealing with {prob[:50]}. We built {name} to {sol[:50]} with 1-click automation. Would you be open to a 3-minute Loom video showing how it works?"*
+- **Call-to-Action**: Soft ask for feedback, zero aggressive hard-selling."""
 
             followups = [
-                "How do I test pricing before writing code?",
-                "What is my estimated CAC vs LTV?",
-                "How can I get my first 100 paying customers?"
+                "What channels are best to send this on?",
+                "How can I get my first 100 paying customers?",
+                "What is my ideal pricing model?"
             ]
 
-        # 5. Competitors, Alternatives, Moat, Differentiation
-        elif any(k in msg_lower for k in ["competitor", "rival", "alternative", "moat", "advantage", "differentiate", "defensib", "compare", "vs", "market share", "replace"]):
-            comp_list = comps.get("competitors") or comps.get("direct_competitors") or []
-            if not isinstance(comp_list, list):
-                comp_list = []
-            moat = _safe_str(comps.get("unique_moat"), f"Hyper-tailored workflows and faster time-to-value for {aud}.")
-            if comp_list and len(comp_list) > 0:
-                comp_items = []
-                for c in comp_list[:2]:
+        # 6. Customer Acquisition, First 100 Users, Marketing Channels, GTM
+        elif re.search(r"\b(100 (paying|users|customers)|first 100|acquire|acquisition|growth|marketing channel|marketing strategy|funnel|get customers|find customers|gtm|go to market)\b", q):
+            channels = gtm.get("acquisition_channels") if isinstance(gtm.get("acquisition_channels"), list) else []
+            if channels and len(channels) > 0:
+                channel_items = []
+                for c in channels[:2]:
                     if isinstance(c, dict):
-                        c_name = c.get('name', 'Competitor')
-                        w_list = c.get('weaknesses') if isinstance(c.get('weaknesses'), list) else []
-                        c_weak = w_list[0] if (w_list and len(w_list) > 0) else "Legacy interface and slow workflow"
-                        c_adv = c.get('competitive_advantage', 'Instant setup and tailored features')
-                        comp_items.append(f"- **{c_name}**: {c_weak} *(Your edge: {c_adv})*")
+                        channel_items.append(f"- **{c.get('channel_name', 'Channel')}**: {c.get('description', '')} *(Target CAC: {c.get('expected_cac', 'Low')})*")
                     else:
-                        comp_items.append(f"- **{str(c)}**: Legacy architecture *(Your edge: Faster setup)*")
-                comp_str = "\n".join(comp_items)
+                        channel_items.append(f"- **{str(c)}**: Direct founder outreach and targeted industry community.")
+                channels_str = "\n".join(channel_items)
             else:
-                comp_str = f"- **Legacy Incumbents**: Heavy, slow, and expensive enterprise tools.\n- **Manual Spreadsheets**: Cheap but error-prone and unscalable."
+                channels_str = f"- **Direct Founder Outreach**: Contact 25 decision-makers in {aud} daily with personalized video audits.\n- **Niche Community Seeding**: Share valuable workflow teardowns in targeted industry hubs."
 
-            reply = f"""**Competitive Landscape & Moat for {name}:**
+            reply = f"""**Fastest path to 100 paying users for {name}:**
 
-{comp_str}
-- **Defensible Moat**: {moat}."""
+{channels_str}
+- **Playbook**: Offer white-glove onboarding to your first 20 beta users in exchange for case studies and referrals."""
 
             followups = [
-                "How do I convince customers to switch from competitors?",
-                "What should I build first in my MVP?",
-                "Why is my startup risky?"
+                "What is my ideal pricing model?",
+                "What is my estimated CAC vs LTV?",
+                "Can you give me a cold outreach message template?"
             ]
 
-        # 6. TAM, SAM, SOM, Market Size, Economics (CAC / LTV)
-        elif any(k in msg_lower for k in ["tam", "sam", "som", "market size", "potential", "opportunity", "cac", "ltv", "unit economic", "cagr", "growth rate", "economics"]):
+        # 7. Target Audience / Customer Personas / ICP
+        elif re.search(r"\b(who (is|are|should)|persona|personas|target audience|ideal customer|icp|demographic|customer profile|buyer persona|who will buy|who to sell)\b", q):
+            primary = segs.get("primary_segment") if isinstance(segs.get("primary_segment"), dict) else {}
+            p_name = _safe_str(primary.get("persona_name"), f"Primary {aud}")
+            pains = primary.get("key_pain_points") if isinstance(primary.get("key_pain_points"), list) else []
+            pain = pains[0] if (pains and len(pains) > 0) else prob
+            wtp = _safe_str(primary.get("willingness_to_pay"), "High willingness to pay for ROI")
+
+            reply = f"""**Ideal Customer Profile (ICP) for {name}:**
+
+- **Target Persona**: **{p_name}** in {ind}.
+- **Core Pain Trigger**: {pain}.
+- **Willingness to Pay**: {wtp}."""
+
+            followups = [
+                "How can I reach this persona directly?",
+                "What is my ideal pricing model?",
+                "What should I build first in my MVP?"
+            ]
+
+        # 8. TAM, SAM, SOM, Market Size, Economics, CAC vs LTV
+        elif re.search(r"\b(tam|sam|som|market size|market potential|unit economics|cac vs ltv|cagr|growth rate|market opportunity)\b", q):
             tam = _safe_str(opp.get("tam"), "Large Addressable Market")
             sam = _safe_str(opp.get("sam"), "Focused Segment")
             som = _safe_str(opp.get("som"), "3-Year Target")
@@ -379,28 +413,8 @@ class AdvisorAgent:
                 "How can I get my first 100 paying customers?"
             ]
 
-        # 7. Customer Personas, Target Audience, ICP, Segmentation
-        elif any(k in msg_lower for k in ["persona", "segment", "audience", "target", "demographic", "icp", "who", "profile", "ideal customer"]):
-            primary = segs.get("primary_segment") if isinstance(segs.get("primary_segment"), dict) else {}
-            p_name = _safe_str(primary.get("persona_name"), f"Primary {aud}")
-            pains = primary.get("key_pain_points") if isinstance(primary.get("key_pain_points"), list) else []
-            pain = pains[0] if (pains and len(pains) > 0) else prob
-            wtp = _safe_str(primary.get("willingness_to_pay"), "High willingness to pay for ROI")
-
-            reply = f"""**Ideal Customer Profile (ICP) for {name}:**
-
-- **Target Persona**: **{p_name}** in {ind}.
-- **Core Pain Trigger**: {pain}.
-- **Willingness to Pay**: {wtp}."""
-
-            followups = [
-                "How can I reach this persona directly?",
-                "What is my ideal pricing model?",
-                "What should I build first in my MVP?"
-            ]
-
-        # 8. SWOT Analysis (Strengths, Weaknesses, Opportunities, Threats)
-        elif any(k in msg_lower for k in ["swot", "strength", "weakness", "opportunit"]):
+        # 9. SWOT Analysis
+        elif re.search(r"\b(swot|strengths? and weakness\w*|strength|weakness|opportunities and threats)\b", q):
             raw_strengths = swot.get("strengths") if isinstance(swot.get("strengths"), list) else []
             raw_weaknesses = swot.get("weaknesses") if isinstance(swot.get("weaknesses"), list) else []
             raw_opps = swot.get("opportunities") if isinstance(swot.get("opportunities"), list) else []
@@ -421,8 +435,8 @@ class AdvisorAgent:
                 "What should I build first in my MVP?"
             ]
 
-        # 9. Launch Roadmap, Next Steps, Execution Checklist
-        elif any(k in msg_lower for k in ["launch", "start", "step", "action", "roadmap", "plan", "execute", "begin", "checklist", "phase"]):
+        # 10. Launch Roadmap & 30-Day Next Steps
+        elif re.search(r"\b(launch|launch plan|next step|next steps|action item|action items|30[- ]day|checklist|how to start|getting started|phase 1)\b", q):
             phases = gtm.get("launch_strategy") if isinstance(gtm.get("launch_strategy"), list) else []
             steps = gtm.get("how_to_get_started") if isinstance(gtm.get("how_to_get_started"), list) else []
             phase_1 = phases[0].get("phase_name", "Phase 1: Pre-launch validation") if (phases and len(phases) > 0 and isinstance(phases[0], dict)) else "Phase 1: Pre-launch validation"
@@ -444,8 +458,8 @@ class AdvisorAgent:
                 "What is my ideal pricing model?"
             ]
 
-        # 10. Pitching, Investors, Fundraising, Valuation
-        elif any(k in msg_lower for k in ["pitch", "investor", "fundrais", "angel", "vc", "raise", "valuation", "deck", "capital"]):
+        # 11. Investor Pitch & Fundraising
+        elif re.search(r"\b(pitch|investor|investors|fundrais\w*|angel|vc|venture capital|raise capital|valuation|deck|pitch deck)\b", q):
             tam = _safe_str(opp.get("tam"), "Market Opportunity")
             moat = _safe_str(comps.get("unique_moat"), "Proprietary workflow")
 
@@ -461,8 +475,8 @@ class AdvisorAgent:
                 "Why is my startup risky?"
             ]
 
-        # 11. Feasibility Score & Verdict
-        elif any(k in msg_lower for k in ["score", "feasib", "verdict", "viability", "rating", "why"]):
+        # 12. Validation Score Breakdown & Feasibility Verdict
+        elif re.search(r"\b(score|scores|verdict|rating|viability|feasibility|why this score|score breakdown)\b", q):
             verdict = _safe_str(summary.get("feasibility_verdict"), "Viable Concept")
             clarity = scores.get("problem_clarity", 80)
             solution_score = scores.get("solution_strength", 80)
@@ -480,13 +494,13 @@ class AdvisorAgent:
                 "Why is my startup risky?"
             ]
 
-        # 12. Tech Stack, Architecture & AI Integration
-        elif any(k in msg_lower for k in ["tech", "stack", "architecture", "code", "database", "ai model", "api", "framework", "backend", "frontend"]):
+        # 13. Tech Stack & Architecture
+        elif re.search(r"\b(tech stack|technology stack|architecture|programming language|database|framework|backend|frontend|ai model|api)\b", q):
             reply = f"""**Recommended Tech Architecture for {name}:**
 
-- **Frontend & App**: Lightweight React/Next.js or React Native mobile shell for quick iteration.
-- **Backend & AI Engine**: FastAPI / Node.js backend with LLM orchestration and vector embeddings.
-- **Database & Auth**: PostgreSQL with Supabase or Firebase for rapid auth and real-time data sync."""
+- **Frontend & App**: Lightweight React/Next.js shell for fast iteration.
+- **Backend & AI Engine**: FastAPI / Node.js backend with async LLM orchestration.
+- **Database & Auth**: PostgreSQL with Supabase or Firebase for rapid setup."""
 
             followups = [
                 "What should I build first in my MVP?",
@@ -494,8 +508,8 @@ class AdvisorAgent:
                 "How can I get my first 100 users?"
             ]
 
-        # 13. Team, Hiring, Co-founders
-        elif any(k in msg_lower for k in ["hire", "team", "cofounder", "co-founder", "developer", "engineer", "designer", "sales"]):
+        # 14. Team & Hiring
+        elif re.search(r"\b(team|hire|hiring|cofounder|co-founder|developer|engineer|sales rep|first employee)\b", q):
             reply = f"""**Early Team Strategy for {name}:**
 
 - **Core Pair**: 1 Full-Stack Builder (Tech/AI) + 1 Domain Expert (Sales/Distribution to {aud}).
@@ -507,8 +521,8 @@ class AdvisorAgent:
                 "How should I pitch to investors?"
             ]
 
-        # 14. Retention, Churn & Engagement
-        elif any(k in msg_lower for k in ["churn", "retention", "retain", "stickiness", "engagement", "repeat", "usage"]):
+        # 15. Retention & Churn
+        elif re.search(r"\b(churn|retention|retain|stickiness|engagement|repeat usage|keep users)\b", q):
             reply = f"""**Retention & Stickiness Strategy for {name}:**
 
 - **Time-to-Value**: Guide {aud} to their first successful workflow outcome in <3 minutes.
@@ -520,7 +534,7 @@ class AdvisorAgent:
                 "Why is my startup risky?"
             ]
 
-        # 15. General Comprehensive Advisor Response
+        # 16. General Comprehensive Advisor Response
         else:
             verdict = _safe_str(summary.get("feasibility_verdict"), "High Viability Concept")
             moat = _safe_str(comps.get("unique_moat"), f"Specialized workflows tailored for {aud}.")
